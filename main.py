@@ -1,5 +1,4 @@
-import config
-from api import db, middleware, models, routes
+from api import config, db, middleware, models, routes
 
 # from api.services import TGbot
 

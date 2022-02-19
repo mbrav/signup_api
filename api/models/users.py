@@ -1,4 +1,5 @@
-from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..db import Base
@@ -11,12 +12,28 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(20), nullable=False)
-    password = Column(Text(), nullable=False)
+    hashed_password = Column(Text(), nullable=False)
     email = Column(String(30), nullable=True)
     first_name = Column(String(30), nullable=True)
     last_name = Column(String(30), nullable=True)
+    is_active = Column(Boolean(), default=True)
+    is_superuser = Column(Boolean(), default=False)
     created_at = Column(DateTime(timezone=True), default=func.now())
 
-    def __init__(self, username, password):
-        self.start = username
-        self.end = password
+    # signups = relationship('User', back_populates='owner')
+
+    def __init__(self,
+                 username: str,
+                 hashed_password: str,
+                 email: str = None,
+                 first_name: str = None,
+                 last_name: str = None,
+                 is_active: bool = True,
+                 is_superuser: bool = False):
+        self.username = username
+        self.hashed_password = hashed_password
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.is_active = is_active
+        self.is_superuser = is_superuser

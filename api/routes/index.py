@@ -10,7 +10,7 @@ async def index(message: str = None):
     """API Health Check """
 
     response = {
-        'message': f'{message}',
+        'status': 'OK',
         'response': 'Fast API service for signups and Telegram integration',
         'time': datetime.utcnow().isoformat()
     }
