@@ -14,8 +14,8 @@ SQLAlchemy = "*"
 PyMySQL = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["argon2"], version = "*"}
-python-multipart = "^0.0.5"
-pydantic = {extras = ["email"], version = "^1.9.0"}
+python-multipart = "*"
+pydantic = {extras = ["email"], version = "*"}
 
 
 [tool.poetry.dev-dependencies]
