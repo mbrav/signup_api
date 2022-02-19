@@ -20,10 +20,11 @@ class Signup(Base):
     phone = Column(String(12), nullable=False)
     email = Column(String(30), nullable=False)
     class_id = Column(String(60), nullable=True)
-    created_at = Column(DateTime, default=func.now())
+    created_at = Column(DateTime(timezone=True), default=func.now())
 
-    def __init__(self, first_name, last_name, phone, email):
+    def __init__(self, first_name, last_name, phone, email, class_id):
         self.first_name = first_name
         self.last_name = last_name
         self.phone = phone
         self.email = email
+        self.class_id = class_id

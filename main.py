@@ -1,13 +1,14 @@
 import config
-from api import db, middleware, models
-from api.routes import router
+from api import db, middleware, models, routes
 
 # from api.services import TGbot
 
 models.Base.metadata.create_all(db.engine)
 
 app = config.app
-app.include_router(router)
+app.include_router(routes.index.router)
+app.include_router(routes.auth.router)
+app.include_router(routes.signups.router)
 app.add_middleware(middleware.ProcessTimeMiddleware)
 
 

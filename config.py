@@ -16,6 +16,11 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN', None)
 
 DATABASE_URL = 'sqlite:///./api.db'
 
+
+SECRET = os.getenv('SECRET', 'HS256')
+CRYPT_ALGORITHM = os.getenv('CRYPT_ALGORITHM', 'HS256')
+TOKEN_EXPIRE_MINUTES = os.getenv('TOKEN_EXPIRE_MINUTES', 15)
+
 if not TESTING:
     DB_USER = os.getenv('DB_USER', None)
     DB_PASSWORD = os.getenv('DB_PASSWORD', None)

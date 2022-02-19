@@ -93,3 +93,9 @@ class AuthService:
     @staticmethod
     def get_password_hash(password):
         return context.hash(password)
+
+
+auth_service = AuthService()
+# auth_service = AuthService(secret=config.SECRET_KEY,
+#                            algorithm=config.CRYPT_ALGORITHM,
+#                            expire=config.TOKEN_EXPIRE_MINUTES)
