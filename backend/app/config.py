@@ -16,6 +16,8 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN', None)
 
 DATABASE_URL = 'sqlite:///./api.db'
 
+# to get a secrete key run:
+# openssl rand -hex 32
 SECRET_KEY = os.getenv('SECRET_KEY', 'pl3seCh@nGeM3!')
 CRYPT_ALGORITHM = os.getenv('CRYPT_ALGORITHM', 'HS256')
 TOKEN_EXPIRE_MINUTES = int(os.getenv('TOKEN_EXPIRE_MINUTES', 15))

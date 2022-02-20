@@ -15,7 +15,7 @@ def create_superuser(username: str,
     db = session()
     user = db.query(models.User).count() != 0
     if not user:
-        hashed_password = auth_service.get_password_hash(password)
+        hashed_password = auth_service.hash_password(password)
         user_in = schema(
             username=username,
             password=hashed_password,

@@ -1,34 +1,15 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from app import db, models, schemas
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jose import jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 context = CryptContext(schemes=['argon2'], deprecated='auto')
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
-
-
-class User(BaseModel):
-    username: str
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    disabled: Optional[bool] = None
-
-
-class UserInDB(User):
-    hashed_password: str
 
 
 class AuthService:
@@ -49,21 +30,31 @@ class AuthService:
         self.context = context
         self.oauth2_scheme = oauth2_scheme
 
-        self.test_db = {
-            'user': {
-                'username': 'user',
-                'full_name': 'John Doe',
-                'email': 'user@example.com',
-                'hashed_password': self.get_password_hash('user'),
-                'disabled': False,
-            }
-        }
+    @staticmethod
+    def get_user(username: str,
+                 db: Session = Depends(db.get_database)) -> models.User:
+        """Get user from database"""
+        user = db.query(
+            models.User).filter(
+            models.User.username == username).first()
+        if user is None:
+            raise HTTPException(
+                status_code=404, detail=f'User "{username}" not registered')
+        return user
 
-    def verify_password(self, plain_password, hashed_password):
+    @staticmethod
+    def verify_password(plain_password, hashed_password):
         return context.verify(plain_password, hashed_password)
 
-    def authenticate_user(self, db, username: str, password: str):
-        user = self.get_user(db, username)
+    @staticmethod
+    def hash_password(password) -> str:
+        return context.hash(password)
+
+    def authenticate_user(
+            self, username: str, password: str,
+            db: Session = Depends(db.get_database)) -> models.User:
+        """Authenticate user"""
+        user = self.get_user(username=username, db=db)
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):
@@ -73,6 +64,7 @@ class AuthService:
     def create_access_token(self,
                             data: dict,
                             expires_delta: Optional[timedelta] = None):
+        """Encode Token"""
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
@@ -84,13 +76,3 @@ class AuthService:
                                  self.SECRET_KEY,
                                  algorithm=self.CRYPT_ALGORITHM)
         return encoded_jwt
-
-    @staticmethod
-    def get_user(db, username: str):
-        if username in db:
-            user_dict = db[username]
-            return UserInDB(**user_dict)
-
-    @staticmethod
-    def get_password_hash(password):
-        return context.hash(password)

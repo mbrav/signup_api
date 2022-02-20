@@ -1,20 +1,22 @@
 from datetime import timedelta
 
-from app import schemas
-from app.services.auth import Token, User  # remove me
+from app import db, models, schemas
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
 
 from .deps import auth_service, get_active_user
 
 router = APIRouter()
 
 
-@router.post('/token', response_model=Token, tags=['auth'])
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = auth_service.authenticate_user(auth_service.test_db,
-                                          form_data.username,
-                                          form_data.password)
+@router.post('/token', response_model=schemas.Token, tags=['auth'])
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
+                                 db: Session = Depends(db.get_database)):
+    user = auth_service.authenticate_user(username=form_data.username,
+                                          password=form_data.password,
+                                          db=db)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -28,11 +30,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@router.get('/users/me', response_model=User, tags=['auth'])
-async def read_users_me(user: User = Depends(get_active_user)):
+@router.get('/users/me', response_model=schemas.User, tags=['auth'])
+async def read_users_me(user: models.User = Depends(get_active_user)):
     return user
 
 
 @router.get('/users/me/signups', tags=['auth'])
-async def read_own_items(user: User = Depends(get_active_user)):
+async def read_own_items(user: models.User = Depends(get_active_user)):
     return [{'item_id': 'Foo', 'owner': user.username}]

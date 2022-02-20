@@ -4,7 +4,7 @@ from fastapi_pagination import LimitOffsetPage, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import Session
 
-from .deps import User, auth_service, get_active_user
+from .deps import auth_service, get_active_user
 
 router = APIRouter()
 
@@ -27,11 +27,13 @@ async def signup_post(schema: schemas.SignupIn,
     return await create()
 
 
-@router.get('/signup/{id}', response_model=schemas.SignupIn, tags=['signups'])
+@router.get('/signup/{id}',
+            status_code=status.HTTP_200_OK,
+            response_model=schemas.SignupIn,
+            tags=['signups'])
 async def signup_get(
         id: int,
         db: Session = Depends(db.get_database),
-        status_code=status.HTTP_200_OK,
         token: str = Depends(auth_service.oauth2_scheme)):
     """Retrieve signups object with GET request"""
 
@@ -43,16 +45,14 @@ async def signup_get(
     return result
 
 
-@router.get(
-    '/signups',
-    response_model=LimitOffsetPage[schemas.SignupOut],
-    tags=['signups'])
+@router.get('/signups',
+            status_code=status.HTTP_200_OK,
+            response_model=LimitOffsetPage[schemas.SignupOut],
+            tags=['signups'])
 async def signups_list(
         db: Session = Depends(db.get_database),
-        status_code=status.HTTP_200_OK,
-        user: User = Depends(get_active_user),
-        token: str = Depends(auth_service.oauth2_scheme),
-):
+        user: models.User = Depends(get_active_user),
+        token: str = Depends(auth_service.oauth2_scheme)):
     """List signups with GET request"""
     return paginate(db.query(models.Signup).order_by(models.Signup.id.desc()))
 
