@@ -47,8 +47,9 @@ async def signup_get(
     tags=['signups'])
 async def signups_list(
         db: Session = Depends(get_database),
-        token: str = Depends(auth_service.oauth2_scheme)):
+        # token: str = Depends(auth_service.oauth2_scheme),
+):
     """List signups with GET request"""
-    return paginate(db.query(models.Signup))
+    return paginate(db.query(models.Signup).order_by(models.Signup.id.desc()))
 
 add_pagination(router)

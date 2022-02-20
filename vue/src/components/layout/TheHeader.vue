@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
 	<header>
 		<!-- NAVBAR -->
 		<div

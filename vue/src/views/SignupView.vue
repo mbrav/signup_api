@@ -1,109 +1,19 @@
 <template>
 	<h2 class="display-6 text-center mb-4">Signups</h2>
-
-	<div class="table-responsive">
-		<table class="table text-center">
-			<thead>
-				<tr>
-					<th style="width: 34%"></th>
-					<th style="width: 22%">Free</th>
-					<th style="width: 22%">Pro</th>
-					<th style="width: 22%">Enterprise</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<th scope="row" class="text-start">Public</th>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row" class="text-start">Private</th>
-					<td></td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-				</tr>
-			</tbody>
-
-			<tbody>
-				<tr>
-					<th scope="row" class="text-start">Permissions</th>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row" class="text-start">Sharing</th>
-					<td></td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row" class="text-start">Unlimited members</th>
-					<td></td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row" class="text-start">Extra security</th>
-					<td></td>
-					<td></td>
-					<td>
-						<svg class="bi" width="24" height="24">
-							<use xlink:href="#check" />
-						</svg>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+	<SignupCreateModal />
+	<SignupTable />
 </template>
+
+<script>
+// @ is an alias to /src
+import SignupCreateModal from "@/components/apiviews/SignupCreateModal.vue";
+import SignupTable from "@/components/apiviews/SignupTable.vue";
+
+export default {
+	name: "SignupView",
+	components: {
+		SignupCreateModal,
+		SignupTable,
+	},
+};
+</script>
