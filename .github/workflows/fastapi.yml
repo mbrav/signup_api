@@ -3,7 +3,8 @@ name: FastAPI and Pytest CI
 on:
   push:
     branches:
-      - "**"
+      - "main"
+      # - "**"
   pull_request:
     branches:
       - "**"

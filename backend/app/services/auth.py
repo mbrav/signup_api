@@ -32,7 +32,7 @@ class UserInDB(User):
 
 
 class AuthService:
-    """"Auth Servie Class"""
+    """"Auth Service Class"""
 
     def __init__(
             self,
@@ -44,6 +44,7 @@ class AuthService:
         self.SECRET_KEY = secret
         self.CRYPT_ALGORITHM = algorithm
         self.TOKEN_EXPIRE_MINUTES = expire
+        self.TOKEN_URL = token_url
 
         self.context = context
         self.oauth2_scheme = oauth2_scheme
@@ -93,9 +94,3 @@ class AuthService:
     @staticmethod
     def get_password_hash(password):
         return context.hash(password)
-
-
-auth_service = AuthService()
-# auth_service = AuthService(secret=config.SECRET_KEY,
-#                            algorithm=config.CRYPT_ALGORITHM,
-#                            expire=config.TOKEN_EXPIRE_MINUTES)

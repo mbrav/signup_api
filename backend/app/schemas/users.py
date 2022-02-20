@@ -7,9 +7,10 @@ from pydantic import BaseModel, EmailStr
 # Shared properties
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     is_active: Optional[bool] = True
-    is_superuser: bool = False
-    full_name: Optional[str] = None
+    is_superuser: Optional[bool] = False
 
     class Config:
         orm_mode = True
@@ -17,7 +18,7 @@ class UserBase(BaseModel):
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    email: EmailStr
+    username: str
     password: str
 
 

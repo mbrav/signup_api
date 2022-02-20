@@ -3,7 +3,8 @@ from fastapi_pagination import LimitOffsetPage, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import Session
 
-from . import auth_service, get_database, models, schemas
+from . import db, models, schemas
+from .deps import User, auth_service, get_active_user
 
 router = APIRouter()
 
@@ -11,10 +12,10 @@ router = APIRouter()
 @router.post(
     '/signup',
     response_model=schemas.SignupOut,
-    status_code=201,
+    status_code=status.HTTP_201_CREATED,
     tags=['signups'])
 async def signup_post(schema: schemas.SignupIn,
-                      db: Session = Depends(get_database)):
+                      db: Session = Depends(db.get_database)):
     """Generate new signup with POST request"""
 
     async def create():
@@ -29,7 +30,8 @@ async def signup_post(schema: schemas.SignupIn,
 @router.get('/signup/{id}', response_model=schemas.SignupIn, tags=['signups'])
 async def signup_get(
         id: int,
-        db: Session = Depends(get_database),
+        db: Session = Depends(db.get_database),
+        status_code=status.HTTP_200_OK,
         token: str = Depends(auth_service.oauth2_scheme)):
     """Retrieve signups object with GET request"""
 
@@ -46,8 +48,10 @@ async def signup_get(
     response_model=LimitOffsetPage[schemas.SignupOut],
     tags=['signups'])
 async def signups_list(
-        db: Session = Depends(get_database),
-        # token: str = Depends(auth_service.oauth2_scheme),
+        db: Session = Depends(db.get_database),
+        status_code=status.HTTP_200_OK,
+        user: User = Depends(get_active_user),
+        token: str = Depends(auth_service.oauth2_scheme),
 ):
     """List signups with GET request"""
     return paginate(db.query(models.Signup).order_by(models.Signup.id.desc()))

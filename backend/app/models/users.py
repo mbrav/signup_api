@@ -24,14 +24,14 @@ class User(Base):
 
     def __init__(self,
                  username: str,
-                 hashed_password: str,
+                 password: str,
                  email: str = None,
                  first_name: str = None,
                  last_name: str = None,
                  is_active: bool = True,
                  is_superuser: bool = False):
         self.username = username
-        self.hashed_password = hashed_password
+        self.hashed_password = password
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
