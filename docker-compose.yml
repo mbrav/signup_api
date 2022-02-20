@@ -1,11 +1,17 @@
 version: "3.8"
 
 services:
-    web:
-        container_name: signup_api
+    backend:
         restart: "on-failure"
-        build: ./
-        command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1 --reload
+        env_file:
+            - ./backend/.env
+        build:
+            context: ./backend
+            dockerfile: backend.dockerfile
+            args:
+                INSTALL_DEV: 'true'
+                INSTALL_JUPYTER: 'false'
+        command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2 --reload
         volumes:
             - ./:/usr/src/app/
         ports:

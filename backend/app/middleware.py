@@ -20,7 +20,8 @@ class ProcessTimeMiddleware(BaseHTTPMiddleware):
         response.headers['X-Process-Time'] = f'{process_time:.5f}'
 
         log_message = f'Request "{request.url.path}" ' \
-            f'{response.status_code} time {process_time:.5f}s '
+            f'client {request.client.host} port {request.client.port} ' \
+            f'code {response.status_code} time {process_time:.5f}s '
 
         slow_warning = process_time > self.time_warning
         if response.status_code < 203 and not slow_warning:

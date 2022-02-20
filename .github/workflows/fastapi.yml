@@ -67,14 +67,21 @@ jobs:
 
       - name: Install Poetry Dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+        run: |
+          source .venv/bin/activate
+          cd backend
+          poetry install --no-interaction --no-root
 
       - name: Install library
-        run: poetry install --no-interaction
+        run: |
+          source .venv/bin/activate
+          cd backend
+          poetry install --no-interaction
 
       - name: Run Pytest
         run: |
           source .venv/bin/activate
+          cd backend
           python -m pytest
 
       - name: Telegram Success Message
