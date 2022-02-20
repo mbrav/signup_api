@@ -1,8 +1,7 @@
+from app.db import Base
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
-from ..db import Base
 
 
 class User(Base):

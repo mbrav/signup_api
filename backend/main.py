@@ -7,7 +7,7 @@ from app import api, config, db, middleware, models
 
 models.Base.metadata.create_all(db.engine)
 if config.FIRST_SUPERUSER:
-    from app.api.deps import create_superuser
+    from app.utils import create_superuser
     create_superuser(
         username=config.FIRST_SUPERUSER,
         password=config.FIRST_SUPERUSER_PASSWORD)

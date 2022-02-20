@@ -1,9 +1,9 @@
+from app import db, models, schemas
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import Session
 
-from . import db, models, schemas
 from .deps import User, auth_service, get_active_user
 
 router = APIRouter()

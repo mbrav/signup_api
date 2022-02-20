@@ -1,10 +1,10 @@
 from datetime import timedelta
 
+from app import schemas
+from app.services.auth import Token, User  # remove me
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..services.auth import Token, User  # remove me
-from . import schemas
 from .deps import auth_service, get_active_user
 
 router = APIRouter()

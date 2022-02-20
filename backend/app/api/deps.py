@@ -1,38 +1,13 @@
 from app import config
+from app.services import AuthService
+from app.services.auth import Token, TokenData, User  # remove me
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from pydantic import ValidationError
 
-from ..services.auth import Token, TokenData, User  # remove me
-from . import AuthService, db, models, schemas
-
 auth_service = AuthService(secret=config.SECRET_KEY,
                            algorithm=config.CRYPT_ALGORITHM,
                            expire=config.TOKEN_EXPIRE_MINUTES)
-
-
-def create_superuser(username: str,
-                     password: str,
-                     session=db.get_db,
-                     schema=schemas.UserCreate) -> None:
-    """
-    Tables should be created with Alembic migrations
-    But if you don't want to use migrations, create
-    the tables un-commenting the next line
-    Base.metadata.create_all(bind=engine)
-    """
-    db = session()
-    user = db.query(models.User).count() != 0
-    if not user:
-        hashed_password = auth_service.get_password_hash(password)
-        user_in = schema(
-            username=username,
-            password=hashed_password,
-            is_superuser=True)
-        new_user = models.User(**user_in.dict())
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
 
 
 async def get_auth_user(
