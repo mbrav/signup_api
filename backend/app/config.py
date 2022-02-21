@@ -43,13 +43,19 @@ class MySQLMixin(DBSettings):
 
     @property
     def DATABASE_URL(self) -> str:
-        if self.TESTING:
-            return 'sqlite:///./api.db'
         url = f'mysql+pymysql://' \
             f'{self.MYSQL_USER}:' \
             f'{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}/' \
             f'{self.MYSQL_NAME}?charset=utf8mb4'
         return url
+
+
+class SQLiteMixin(DBSettings):
+    """"SQLite Settings Mixin"""
+
+    @property
+    def SQLITE_DATABASE_URL(self) -> str:
+        return 'sqlite:///./api.db'
 
 
 class ServiceMixin(SettingsBase):
@@ -67,7 +73,7 @@ class ServiceMixin(SettingsBase):
     TELEGRAM_TOKEN: Optional[str] = Field(env='TELEGRAM_TOKEN')
 
 
-class Settings(MySQLMixin, ServiceMixin):
+class Settings(MySQLMixin, SQLiteMixin, ServiceMixin):
     """Combined Settings with previous settings as mixins"""
     pass
 

@@ -40,7 +40,7 @@ class AuthService:
             models.User.username == username).first()
         if user is None:
             raise HTTPException(
-                status_code=404, detail=f'User "{username}" not registered')
+                status_code=404, detail=f"User '{username}' not registered")
         return user
 
     @staticmethod

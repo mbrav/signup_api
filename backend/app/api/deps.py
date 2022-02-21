@@ -30,7 +30,8 @@ async def get_auth_user(db: Session = Depends(db.get_database),
         raise credentials_exception
     user = auth_service.get_user(db=db, username=token_data.username)
     if user is None:
-        raise HTTPException(status_code=404, detail='User not found')
+        raise HTTPException(
+            status_code=404, detail=f"User '{token_data.username}' not found")
     return user
 
 

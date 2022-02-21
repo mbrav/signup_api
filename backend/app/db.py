@@ -7,16 +7,16 @@ from sqlalchemy.orm import sessionmaker
 
 from app.config import settings
 
-DATABASE_URL = settings.DATABASE_URL
 engine = None
 
 if settings.TESTING:
+    # Create sqlite database if testing
     engine = create_engine(
-        DATABASE_URL,
+        settings.SQLITE_DATABASE_URL,
         connect_args={'check_same_thread': False})
 else:
     engine = create_engine(
-        DATABASE_URL,
+        settings.DATABASE_URL,
         pool_pre_ping=True,
         echo_pool=True,
         pool_size=20,
