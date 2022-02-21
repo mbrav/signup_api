@@ -1,14 +1,15 @@
-from app import config, db, models, schemas
+from app import db, models, schemas
+from app.config import settings
 from app.services import AuthService
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-auth_service = AuthService(secret=config.SECRET_KEY,
-                           algorithm=config.CRYPT_ALGORITHM,
-                           expire=config.TOKEN_EXPIRE_MINUTES,
-                           token_url=config.TOKEN_URL)
+auth_service = AuthService(secret=settings.SECRET_KEY,
+                           algorithm=settings.CRYPT_ALGORITHM,
+                           expire=settings.TOKEN_EXPIRE_MINUTES,
+                           token_url=settings.TOKEN_URL)
 
 
 async def get_auth_user(db: Session = Depends(db.get_database),

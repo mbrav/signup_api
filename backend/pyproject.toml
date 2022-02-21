@@ -6,16 +6,15 @@ authors = ["mbrav <mbrav@protonmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-python-dotenv = "*"
 fastapi = "*"
 fastapi-pagination = {extras = ["sqlalchemy"], version = "*"}
+pydantic = {extras = ["email", "dotenv"], version = "*"}
 uvicorn = "*"
 SQLAlchemy = "*"
 PyMySQL = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["argon2"], version = "*"}
 python-multipart = "*"
-pydantic = {extras = ["email"], version = "*"}
 
 
 [tool.poetry.dev-dependencies]

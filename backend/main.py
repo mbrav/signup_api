@@ -1,36 +1,36 @@
 from starlette.middleware.cors import CORSMiddleware
 
-from app import api, config, db, middleware, models
+from app import api, db, middleware, models
+from app.config import app, settings
 
 # from app.services import TGbot
 
 
 models.Base.metadata.create_all(db.engine)
-if config.FIRST_SUPERUSER:
+if settings.FIRST_SUPERUSER:
     from app.utils import create_superuser
     create_superuser(
-        username=config.FIRST_SUPERUSER,
-        password=config.FIRST_SUPERUSER_PASSWORD)
+        username=settings.FIRST_SUPERUSER,
+        password=settings.FIRST_SUPERUSER_PASSWORD)
 
 
-app = config.app
 app.include_router(api.index.router)
 app.include_router(api.auth.router)
 app.include_router(api.signups.router)
 
 
 app.add_middleware(middleware.ProcessTimeMiddleware)
-if config.BACKEND_CORS_ORIGINS:
+if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=config.BACKEND_CORS_ORIGINS,
+        allow_origins=settings.BACKEND_CORS_ORIGINS,
         # allow_credentials=True,
         allow_methods=['*'],
         allow_headers=['*'],
     )
 
 
-# bot = TGbot(token=config.TELEGRAM_TOKEN)
+# bot = TGbot(token=settings.TELEGRAM_TOKEN)
 # bot.run()
 
 if __name__ == '__main__':

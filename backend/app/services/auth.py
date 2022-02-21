@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from app import config, db, models, schemas
+from app import db, models, schemas
+from app.config import settings
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -9,7 +10,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 context = CryptContext(schemes=['argon2'], deprecated='auto')
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=config.TOKEN_URL)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.TOKEN_URL)
 
 
 class AuthService:
@@ -31,8 +32,8 @@ class AuthService:
         self.oauth2_scheme = oauth2_scheme
 
     @staticmethod
-    async def get_user(username: str,
-                       db: Session = Depends(db.get_database)) -> models.User:
+    def get_user(username: str,
+                 db: Session = Depends(db.get_database)) -> models.User:
         """Get user from database"""
         user = db.query(
             models.User).filter(
