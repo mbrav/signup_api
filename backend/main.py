@@ -8,7 +8,7 @@ from app.config import app, settings
 # bot = TGbot(token=settings.TELEGRAM_TOKEN)
 # bot.run()
 
-app.include_router(api.api_router)
+app.include_router(api.api_router, prefix=settings.API_V1_STR)
 
 models.Base.metadata.create_all(db.engine)
 if settings.FIRST_SUPERUSER:

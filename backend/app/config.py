@@ -9,7 +9,7 @@ class SettingsBase(BaseSettings):
     """
     App Base Settings
 
-    Тo get a неш secret key run:
+    Тo get a new secret key run:
         openssl rand -hex 32
 
     """
@@ -18,8 +18,8 @@ class SettingsBase(BaseSettings):
     DEBUG: bool = Field(env='DEBUG', default=False)
     LOGGING: bool = Field(env='LOGGING', default=False)
 
-    SECRET_KEY: str = Field(
-        env='SECRET_KEY', default='pl3seCh@nGeM3!')
+    SECRET_KEY: str = Field(env='SECRET_KEY', default='pl3seCh@nGeM3!')
+    API_V1_STR: str = Field(env='API_V1_STR', default='/api')
 
     class Config:
         env_file = '.env'

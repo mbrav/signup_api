@@ -83,7 +83,7 @@ jobs:
         run: |
           source .venv/bin/activate
           cd backend
-          python -m pytest
+          pytest
 
       - name: Telegram Success Message
         if: ${{ success() }}
