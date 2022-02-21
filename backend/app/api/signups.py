@@ -9,11 +9,9 @@ from .deps import auth_service, get_active_user
 router = APIRouter()
 
 
-@router.post(
-    '/signup',
-    response_model=schemas.SignupOut,
-    status_code=status.HTTP_201_CREATED,
-    tags=['signups'])
+@router.post(path='',
+             response_model=schemas.SignupOut,
+             status_code=status.HTTP_201_CREATED)
 async def signup_post(schema: schemas.SignupCreate,
                       db: Session = Depends(db.get_database)):
     """Generate new signup with POST request"""
@@ -27,10 +25,9 @@ async def signup_post(schema: schemas.SignupCreate,
     return await create()
 
 
-@router.get('/signup/{id}',
+@router.get(path='/{id}',
             status_code=status.HTTP_200_OK,
-            response_model=schemas.SignupOut,
-            tags=['signups'])
+            response_model=schemas.SignupOut)
 async def signup_get(
         id: int,
         db: Session = Depends(db.get_database),
@@ -45,13 +42,12 @@ async def signup_get(
     return result
 
 
-@router.get('/signups',
+@router.get(path='',
             status_code=status.HTTP_200_OK,
-            response_model=LimitOffsetPage[schemas.SignupOut],
-            tags=['signups'])
+            response_model=LimitOffsetPage[schemas.SignupOut])
 async def signups_list(
-        # token: str = Depends(auth_service.oauth2_scheme),
-        # user: models.User = Depends(get_active_user),
+        token: str = Depends(auth_service.oauth2_scheme),
+        user: models.User = Depends(get_active_user),
         db: Session = Depends(db.get_database)):
     """List signups with GET request"""
     return paginate(db.query(models.Signup).order_by(models.Signup.id.desc()))

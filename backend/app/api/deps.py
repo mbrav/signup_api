@@ -8,12 +8,12 @@ from sqlalchemy.orm import Session
 
 auth_service = AuthService(secret=settings.SECRET_KEY,
                            algorithm=settings.CRYPT_ALGORITHM,
-                           expire=settings.TOKEN_EXPIRE_MINUTES,
-                           token_url=settings.TOKEN_URL)
+                           expire=settings.TOKEN_EXPIRE_MINUTES)
 
 
-async def get_auth_user(db: Session = Depends(db.get_database),
-                        token: str = Depends(auth_service.oauth2_scheme)) -> models.User:
+async def get_auth_user(
+        db: Session = Depends(db.get_database),
+        token: str = Depends(auth_service.oauth2_scheme)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Could not validate credentials',

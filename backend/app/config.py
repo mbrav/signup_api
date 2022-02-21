@@ -6,14 +6,18 @@ from pydantic import AmqpDsn, AnyHttpUrl, BaseSettings, Field
 
 
 class SettingsBase(BaseSettings):
-    """"App Base Settings"""
+    """
+    App Base Settings
+
+    Тo get a неш secret key run:
+        openssl rand -hex 32
+
+    """
 
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)
     LOGGING: bool = Field(env='LOGGING', default=False)
 
-    # to get a secrete key run:
-    # openssl rand -hex 32
     SECRET_KEY: str = Field(
         env='SECRET_KEY', default='pl3seCh@nGeM3!')
 
@@ -53,16 +57,12 @@ class MySQLMixin(DBSettings):
 class SQLiteMixin(DBSettings):
     """"SQLite Settings Mixin"""
 
-    @property
-    def SQLITE_DATABASE_URL(self) -> str:
-        return 'sqlite:///./api.db'
+    SQLITE_DATABASE_URL: Optional[str] = 'sqlite:///./api.db'
 
 
 class ServiceMixin(SettingsBase):
     """Service Settings Mixin"""
 
-    TOKEN_URL: str = Field(
-        env='TOKEN_URL', default='/token')
     CRYPT_ALGORITHM: str = Field(
         env='CRYPT_ALGORITHM', default='HS256')
     TOKEN_EXPIRE_MINUTES: int = Field(

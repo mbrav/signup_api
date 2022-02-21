@@ -10,7 +10,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 context = CryptContext(schemes=['argon2'], deprecated='auto')
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.TOKEN_URL)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 
 class AuthService:
@@ -23,10 +23,10 @@ class AuthService:
             expire: int = 30,
             token_url: str = 'token'):
         """Auth service initialization"""
+
         self.SECRET_KEY = secret
         self.CRYPT_ALGORITHM = algorithm
         self.TOKEN_EXPIRE_MINUTES = expire
-        self.TOKEN_URL = token_url
 
         self.context = context
         self.oauth2_scheme = oauth2_scheme
@@ -44,27 +44,29 @@ class AuthService:
         return user
 
     @staticmethod
-    def verify_password(plain_password, hashed_password):
-        return context.verify(plain_password, hashed_password)
+    def verify_password(plain_password: str, hashed_password: str) -> bool:
+        return context.verify(secret=plain_password, hash=hashed_password)
 
     @staticmethod
     def hash_password(password) -> str:
+        """Hash password using with current password context"""
         return context.hash(password)
 
     async def authenticate_user(
             self, username: str, password: str,
             db: Session = Depends(db.get_database)) -> models.User:
         """Authenticate user"""
-        user = await self.get_user(username=username, db=db)
+        user = self.get_user(username=username, db=db)
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):
             return False
         return user
 
-    def create_access_token(self,
-                            data: dict,
-                            expires_delta: Optional[timedelta] = None):
+    def create_access_token(
+            self,
+            data: dict,
+            expires_delta: Optional[timedelta] = None) -> str:
         """Encode Token"""
         to_encode = data.copy()
         if expires_delta:

@@ -5,8 +5,8 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-@router.get('/', tags=['index'])
-async def index(message: str = None):
+@router.get('/')
+async def health_check(message: str = None):
     """API Health Check """
 
     response = {
