@@ -1,23 +1,19 @@
-from app.db import Base
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Column, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+
+from .base import BaseModel
 
 
-class User(Base):
+class User(BaseModel):
     """User class"""
 
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True, index=True)
     username = Column(String(20), nullable=False)
-    hashed_password = Column(Text(), nullable=False)
+    hashed_password = Column(String(130), nullable=False)
     email = Column(String(30), nullable=True)
     first_name = Column(String(30), nullable=True)
     last_name = Column(String(30), nullable=True)
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
-    created_at = Column(DateTime(timezone=True), default=func.now())
 
     # signups = relationship('User', back_populates='owner')
 

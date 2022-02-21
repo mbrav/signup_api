@@ -1,24 +1,20 @@
-from app.db import Base
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+
+from .base import BaseModel
 
 
-class Signup(Base):
+class Signup(BaseModel):
     """Signup class"""
 
-    __tablename__ = 'signups'
-
-    id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String(30), nullable=False)
     last_name = Column(String(30), nullable=False)
     phone = Column(String(12), nullable=False)
     email = Column(String(30), nullable=False)
-    created_at = Column(DateTime(timezone=True), default=func.now())
 
     class_id = Column(String(60), nullable=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-    # user = relationship('User', back_populates='signups')
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
+    # user = relationship('User', back_populates='signup')
 
     def __init__(self,
                  first_name: str,

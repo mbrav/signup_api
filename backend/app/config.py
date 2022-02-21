@@ -21,12 +21,13 @@ DATABASE_URL = 'sqlite:///./api.db'
 SECRET_KEY = os.getenv('SECRET_KEY', 'pl3seCh@nGeM3!')
 CRYPT_ALGORITHM = os.getenv('CRYPT_ALGORITHM', 'HS256')
 TOKEN_EXPIRE_MINUTES = int(os.getenv('TOKEN_EXPIRE_MINUTES', 15))
-
+TOKEN_URL = os.getenv('TOKEN_URL', '/token')
 FIRST_SUPERUSER = os.getenv('FIRST_SUPERUSER', 'admin')
 FIRST_SUPERUSER_PASSWORD = os.getenv('FIRST_SUPERUSER_PASSWORD', 'password')
 
 BACKEND_CORS_ORIGINS = os.getenv('BACKEND_CORS_ORIGINS', '').split()
 
+print(FIRST_SUPERUSER)
 if not TESTING:
     DB_USER = os.getenv('DB_USER', None)
     DB_PASSWORD = os.getenv('DB_PASSWORD', None)

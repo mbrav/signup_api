@@ -14,7 +14,7 @@ router = APIRouter()
     response_model=schemas.SignupOut,
     status_code=status.HTTP_201_CREATED,
     tags=['signups'])
-async def signup_post(schema: schemas.SignupIn,
+async def signup_post(schema: schemas.SignupCreate,
                       db: Session = Depends(db.get_database)):
     """Generate new signup with POST request"""
 
@@ -29,7 +29,7 @@ async def signup_post(schema: schemas.SignupIn,
 
 @router.get('/signup/{id}',
             status_code=status.HTTP_200_OK,
-            response_model=schemas.SignupIn,
+            response_model=schemas.SignupOut,
             tags=['signups'])
 async def signup_get(
         id: int,
@@ -50,9 +50,9 @@ async def signup_get(
             response_model=LimitOffsetPage[schemas.SignupOut],
             tags=['signups'])
 async def signups_list(
-        db: Session = Depends(db.get_database),
-        user: models.User = Depends(get_active_user),
-        token: str = Depends(auth_service.oauth2_scheme)):
+        # token: str = Depends(auth_service.oauth2_scheme),
+        # user: models.User = Depends(get_active_user),
+        db: Session = Depends(db.get_database)):
     """List signups with GET request"""
     return paginate(db.query(models.Signup).order_by(models.Signup.id.desc()))
 

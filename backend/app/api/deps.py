@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 auth_service = AuthService(secret=config.SECRET_KEY,
                            algorithm=config.CRYPT_ALGORITHM,
-                           expire=config.TOKEN_EXPIRE_MINUTES)
+                           expire=config.TOKEN_EXPIRE_MINUTES,
+                           token_url=config.TOKEN_URL)
 
 
 async def get_auth_user(db: Session = Depends(db.get_database),
