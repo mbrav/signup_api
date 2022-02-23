@@ -19,6 +19,8 @@ if settings.FIRST_SUPERUSER:
 
 
 app.add_middleware(middleware.ProcessTimeMiddleware)
+# app.add_middleware(middleware.ClientLookupMiddleware)
+
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,

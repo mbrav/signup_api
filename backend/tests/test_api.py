@@ -1,29 +1,34 @@
+import pytest
 from app import models
 from app.config import settings
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from sqlalchemy.orm import Session
 
 
 class TestApi:
     """Test Api class"""
 
-    def test_api_root(self, client: TestClient) -> None:
-        response = client.get(f'{settings.API_V1_STR}/')
+    @pytest.mark.asyncio
+    async def test_api_root(self, async_client: AsyncClient) -> None:
+        response = await async_client.get(f'{settings.API_V1_STR}/')
         assert response.status_code == 200
         assert 'response' in response.json()
 
-    def test_create_signup(
+    @pytest.mark.asyncio
+    async def test_create_signup(
         self,
-        db: Session,
-        client: TestClient,
+        db_session: Session,
+        async_client: AsyncClient,
         new_signup: dict
     ) -> None:
 
-        res = client.post(f'{settings.API_V1_STR}/signups', json=new_signup)
+        response = await async_client.post(
+            f'{settings.API_V1_STR}/signups', json=new_signup)
 
-        created_user = db.query(
-            models.Signup).filter(
-            models.Signup.first_name == new_signup['first_name']).first()
-
-        assert res.status_code == 201
-        assert created_user
+        model = models.Signup
+        created_signup = db_session.query(model).filter(
+            model.last_name == new_signup['last_name']).first()
+            
+        assert response.status_code == 201
+        assert created_signup
+        # assert new_signup.items() <= created_signup.items()

@@ -57,7 +57,8 @@ class MySQLMixin(DBSettings):
 class SQLiteMixin(DBSettings):
     """"SQLite Settings Mixin"""
 
-    SQLITE_DATABASE_URL: Optional[str] = 'sqlite:///./api.db'
+    SQLITE_DATABASE_FILE: str = 'sqlite:///./api.db'
+    SQLITE_DATABASE_MEMORY: str = 'sqlite:///:memory:'
 
 
 class ServiceMixin(SettingsBase):

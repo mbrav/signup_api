@@ -12,7 +12,7 @@ engine = None
 if settings.TESTING:
     # Create sqlite database if testing
     engine = create_engine(
-        settings.SQLITE_DATABASE_URL,
+        settings.SQLITE_DATABASE_FILE,
         connect_args={'check_same_thread': False})
 else:
     engine = create_engine(

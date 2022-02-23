@@ -15,14 +15,15 @@ PyMySQL = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["argon2"], version = "*"}
 python-multipart = "*"
+httpx = {extras = ["http2"], version = "*"}
 
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
 pytest-env = "*"
+pytest-asyncio = "*"
 flake8 = "*"
 autopep8 = "*"
-requests = "*"
 
 [tool.pytest.ini_options]
 minversion = "6.2"
@@ -34,7 +35,11 @@ filterwarnings = [
     "ignore::DeprecationWarning",
 ]
 addopts = "-vv -p no:cacheprovider"
-env = ["TESTING=True"]
+asyncio_mode = "auto"
+env = [
+    "TESTING=True",
+    "LOGGING=False"
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -10,7 +10,8 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 context = CryptContext(schemes=['argon2'], deprecated='auto')
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl=f'{settings.API_V1_STR}/auth/token')
 
 
 class AuthService:
@@ -32,19 +33,26 @@ class AuthService:
         self.oauth2_scheme = oauth2_scheme
 
     @staticmethod
-    def get_user(username: str,
-                 db: Session = Depends(db.get_database)) -> models.User:
+    def get_user(
+        username: str,
+        db_session: Session = Depends(db.get_database)
+    ) -> models.User:
         """Get user from database"""
-        user = db.query(
-            models.User).filter(
-            models.User.username == username).first()
+
+        model = models.User
+        user = db_session.query(model).filter(
+            model.username == username).first()
         if user is None:
             raise HTTPException(
-                status_code=404, detail=f"User '{username}' not registered")
+                status_code=404,
+                detail=f"User '{username}' not registered")
         return user
 
     @staticmethod
-    def verify_password(plain_password: str, hashed_password: str) -> bool:
+    def verify_password(
+        plain_password: str,
+        hashed_password: str
+    ) -> bool:
         return context.verify(secret=plain_password, hash=hashed_password)
 
     @staticmethod
@@ -53,10 +61,13 @@ class AuthService:
         return context.hash(password)
 
     async def authenticate_user(
-            self, username: str, password: str,
-            db: Session = Depends(db.get_database)) -> models.User:
+        self,
+        username: str,
+        password: str,
+        db_session: Session = Depends(db.get_database)
+    ) -> models.User:
         """Authenticate user"""
-        user = self.get_user(username=username, db=db)
+        user = self.get_user(username=username, db_session=db_session)
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):
@@ -64,9 +75,10 @@ class AuthService:
         return user
 
     def create_access_token(
-            self,
-            data: dict,
-            expires_delta: Optional[timedelta] = None) -> str:
+        self,
+        data: dict,
+        expires_delta: Optional[timedelta] = None
+    ) -> str:
         """Encode Token"""
         to_encode = data.copy()
         if expires_delta:
@@ -75,7 +87,8 @@ class AuthService:
             delta = timedelta(minutes=self.TOKEN_EXPIRE_MINUTES)
             expire = datetime.utcnow() + delta
         to_encode.update({'exp': expire})
-        encoded_jwt = jwt.encode(to_encode,
-                                 self.SECRET_KEY,
-                                 algorithm=self.CRYPT_ALGORITHM)
+        encoded_jwt = jwt.encode(
+            to_encode,
+            self.SECRET_KEY,
+            algorithm=self.CRYPT_ALGORITHM)
         return encoded_jwt
