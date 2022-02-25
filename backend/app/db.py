@@ -31,11 +31,6 @@ Session = sessionmaker(
 Base = declarative_base()
 
 
-def get_db():
-    db = Session()
-    return db
-
-
 async def get_database() -> Generator:
     """Fresh implementation of 0.74 feature
     https://github.com/tiangolo/fastapi/releases/tag/0.74.0

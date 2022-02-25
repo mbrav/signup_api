@@ -1,32 +1,36 @@
 import random
 import string
 
+from sqlalchemy.orm import Session
+
 from app import db, models, schemas
 from app.api import auth_service
+from app.models import to_snake_case
 
 
-def create_superuser(username: str,
-                     password: str,
-                     session=db.get_db,
-                     schema=schemas.UserCreate) -> None:
+async def create_superuser(
+    username: str,
+    password: str,
+    session: Session = db.Session
+) -> None:
     """
     Tables should be created with Alembic migrations
     But if you don't want to use migrations, create
     the tables un-commenting the next line
     Base.metadata.create_all(bind=engine)
     """
-    db = session()
-    user = db.query(models.User).count() != 0
+    db_session = session()
+    user = db_session.query(models.User).count() != 0
     if not user:
         hashed_password = auth_service.hash_password(password)
-        user_in = schema(
+        user_in = schemas.UserCreate(
             username=username,
             password=hashed_password,
             is_superuser=True)
         new_user = models.User(**user_in.dict())
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        db_session.add(new_user)
+        db_session.commit()
+        db_session.refresh(new_user)
 
 
 def random_lower_string(num: int = 20) -> str:

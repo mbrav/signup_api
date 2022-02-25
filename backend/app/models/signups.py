@@ -13,7 +13,7 @@ class Signup(BaseModel):
     email = Column(String(30), nullable=False)
 
     class_id = Column(String(60), nullable=True)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     # user = relationship('User', back_populates='signup')
 
     def __init__(self,

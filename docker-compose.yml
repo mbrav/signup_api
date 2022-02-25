@@ -1,18 +1,35 @@
-version: "3.8"
+version: '3.7'
 
 services:
     backend:
-        restart: "on-failure"
+        restart: on-failure
         env_file:
             - ./backend/.env
         build:
             context: ./backend
             dockerfile: backend.dockerfile
             args:
-                INSTALL_DEV: 'true'
-                INSTALL_JUPYTER: 'false'
+                INSTALL_DEV: 'false'
         command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2 --reload
         volumes:
             - ./:/usr/src/app/
         ports:
             - 8000:8000
+        networks:
+            - web
+
+    nginx:
+        restart: always
+        image: nginx:alpine
+        ports:
+            - '80:80'
+        volumes:
+            - ./nginx/signup-api.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - backend
+        networks:
+            - web
+
+networks:
+    web:
+        driver: bridge

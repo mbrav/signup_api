@@ -4,6 +4,17 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
 
 
+def to_snake_case(str: str) -> str:
+    res = [str[0].lower()]
+    for c in str[1:]:
+        if c in ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+            res.append('_')
+            res.append(c.lower())
+        else:
+            res.append(c)
+    return ''.join(res)
+
+
 class BaseModel(Base):
     """Abstract base model"""
 
@@ -15,4 +26,4 @@ class BaseModel(Base):
 
     @declared_attr
     def __tablename__(cls) -> str:
-        return cls.__name__.lower()
+        return to_snake_case(cls.__name__) + 's'

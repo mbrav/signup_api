@@ -105,6 +105,6 @@ if settings.LOGGING:
 app = FastAPI(
     title='API service for signups and Telegram integration',
     docs_url='/docs',
-    version='0.1.2',
+    version='0.1.3',
     redoc_url='/redocs'
 )

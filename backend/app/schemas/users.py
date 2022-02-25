@@ -13,7 +13,7 @@ class UserBase(BaseModel):
 
 
 # Properties to receive via API on creation
-class UserCreate(UserBase):
+class UserLogin(UserBase):
     password: str
 
 
@@ -25,9 +25,7 @@ class UserUpdate(UserBase):
     password: Optional[str] = None
 
 
-class UserInDBBase(UserUpdate):
-    id: Optional[int] = None
-    created_at: datetime
+class UserCreate(UserUpdate):
     is_superuser: Optional[bool] = False
     is_active: Optional[bool] = True
 
@@ -35,11 +33,14 @@ class UserInDBBase(UserUpdate):
         orm_mode = True
 
 
-# Additional properties to return via API
-class User(UserInDBBase):
-    pass
+class User(UserCreate):
+    is_superuser: Optional[bool] = False
+    is_active: Optional[bool] = True
+
+    class Config:
+        orm_mode = True
 
 
 # Additional properties stored in DB
-class UserInDB(UserInDBBase):
+class UserInDB(User):
     hashed_password: str

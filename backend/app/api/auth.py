@@ -45,7 +45,7 @@ async def access_token_login(
     response_model=schemas.UserBase,
     status_code=status.HTTP_201_CREATED)
 async def user_register(
-    schema: schemas.UserCreate,
+    schema: schemas.UserLogin,
     db_session: Session = Depends(db.get_database)
 ) -> models.User:
     """Register new user"""

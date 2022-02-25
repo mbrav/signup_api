@@ -2,6 +2,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app import api, db, middleware, models
 from app.config import app, settings
+from app.utils import create_superuser
 
 # from app.services import TGbot
 
@@ -9,13 +10,6 @@ from app.config import app, settings
 # bot.run()
 
 app.include_router(api.api_router, prefix=settings.API_V1_STR)
-
-models.Base.metadata.create_all(db.engine)
-if settings.FIRST_SUPERUSER:
-    from app.utils import create_superuser
-    create_superuser(
-        username=settings.FIRST_SUPERUSER,
-        password=settings.FIRST_SUPERUSER_PASSWORD)
 
 
 app.add_middleware(middleware.ProcessTimeMiddleware)
@@ -30,12 +24,20 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=['*'],
     )
 
+models.Base.metadata.create_all(db.engine)
 
-if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run(
-        app,
-        host='0.0.0.0',
-        port=8000,
-        debug=True
-    )
+
+@app.on_event("startup")
+async def startup_event():
+    if settings.FIRST_SUPERUSER:
+        await create_superuser(
+            username=settings.FIRST_SUPERUSER,
+            password=settings.FIRST_SUPERUSER_PASSWORD)
+    if __name__ == '__main__':
+        import uvicorn
+        await uvicorn.run(
+            app,
+            host='0.0.0.0',
+            port=8000,
+            debug=True
+        )

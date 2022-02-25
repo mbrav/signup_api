@@ -52,12 +52,12 @@ class ClientLookupMiddleware(BaseHTTPMiddleware):
         process_time = time.time() - start_time
 
         res_json = response.json()
-        ip = res_json['ip']
-        country = res_json['country_name']
-        city = res_json['city']
-        region = res_json['region']
-        timezone = res_json['timezone']
-        organization = res_json['org']
+        ip = res_json.get('ip', None)
+        country = res_json.get('country_name', None)
+        city = res_json.get('city', None)
+        region = res_json.get('region', None)
+        timezone = res_json.get('timezone', None)
+        organization = res_json.get('org', None)
 
         log_message = f'IP: "{ip}" Country: "{country}" Region: "{region}" ' \
             f'City: "{city}" Org: "{organization}" Timezone: "{timezone}" ' \
