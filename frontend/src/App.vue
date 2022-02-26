@@ -10,7 +10,7 @@
 	</div>
 </template>
 
-<style>
+<style type="scss">
 body {
 	margin: 0;
 }
