@@ -2,12 +2,13 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app import api, db, middleware, models
 from app.config import app, settings
+from app.services import GoogleCal
 from app.utils import create_superuser
 
-# from app.services import TGbot
-
-# bot = TGbot(token=settings.TELEGRAM_TOKEN)
-# bot.run()
+google_cal = GoogleCal(
+    api_key=settings.CAL_API_KEY,
+    cal_id=settings.CAL_ID,
+)
 
 app.include_router(api.api_router, prefix=settings.API_V1_STR)
 
@@ -29,6 +30,7 @@ models.Base.metadata.create_all(db.engine)
 
 @app.on_event("startup")
 async def startup_event():
+    google_cal.get()
     if settings.FIRST_SUPERUSER:
         await create_superuser(
             username=settings.FIRST_SUPERUSER,

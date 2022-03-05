@@ -72,6 +72,8 @@ class ServiceMixin(SettingsBase):
         env='BACKEND_CORS_ORIGINS')
 
     TELEGRAM_TOKEN: Optional[str] = Field(env='TELEGRAM_TOKEN')
+    CAL_API_KEY: Optional[str] = Field(env='CAL_API_KEY')
+    CAL_ID: Optional[str] = Field(env='CAL_ID')
 
 
 class Settings(MySQLMixin, SQLiteMixin, ServiceMixin):
