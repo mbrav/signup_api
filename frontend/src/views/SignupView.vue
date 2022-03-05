@@ -6,8 +6,8 @@
 
 <script>
 // @ is an alias to /src
-import SignupCreateModal from "@/components/apiviews/SignupCreateModal.vue";
-import SignupTable from "@/components/apiviews/SignupTable.vue";
+import SignupCreateModal from "@/components/views/SignupCreateModal.vue";
+import SignupTable from "@/components/views/SignupTable.vue";
 
 export default {
 	name: "SignupView",

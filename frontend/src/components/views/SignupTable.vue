@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import store from "@/store";
 
 export default {
 	name: "SignupTable",
@@ -37,16 +37,9 @@ export default {
 		};
 	},
 	methods: {
-		getSignups() {
-			axios
-				.get("/signups")
-				.then((res) => {
-					this.data = res.data.items;
-					console.log(res.data);
-				})
-				.catch((error) => {
-					console.error(error);
-				});
+		async getSignups() {
+			await store.dispatch("getSignups", this.form);
+			this.data = store.getters.signups;
 		},
 	},
 	created() {

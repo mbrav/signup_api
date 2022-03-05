@@ -11,12 +11,15 @@
 </template>
 
 <style type="scss">
+@import "bootstrap/dist/css/bootstrap.css";
+@import "@/assets/styles/main.scss";
 body {
 	margin: 0;
 }
 </style>
 
 <script>
+import "bootstrap/js/src/modal.js";
 import TheHeader from "@/components/layout/TheHeader.vue";
 import TheFooter from "@/components/layout/TheFooter.vue";
 

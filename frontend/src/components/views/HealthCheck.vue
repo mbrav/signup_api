@@ -1,6 +1,6 @@
 <template>
 	<div class="about-header p-3 pb-md-4 mx-auto text-center">
-		<h1 class="display-4 fw-normal">Status {{ status }}</h1>
+		<h1 class="display-4 fw-normal">HealthCheck {{ status }}</h1>
 		<p class="fs-5 text-muted">"{{ message }}"</p>
 		<p class="fs-5 text-muted">Server time: {{ time }}</p>
 		<button
@@ -17,7 +17,7 @@
 import axios from "axios";
 
 export default {
-	name: "StatusHeader",
+	name: "HealthCheck",
 	data() {
 		return {
 			status: "",
@@ -27,8 +27,8 @@ export default {
 		};
 	},
 	methods: {
-		getMessage() {
-			axios
+		async getMessage() {
+			await axios
 				.get("/")
 				.then((res) => {
 					this.data = res.data;
@@ -41,8 +41,8 @@ export default {
 				});
 		},
 	},
-	created() {
-		this.getMessage();
+	async created() {
+		await this.getMessage();
 	},
 };
 </script>

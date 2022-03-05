@@ -36,7 +36,7 @@
 									class="form-control"
 									id="formFirstName"
 									v-model="form.first_name"
-									placeholder="name@example.com"
+									placeholder="First Name"
 								/>
 								<label for="formFirstName">First Name</label>
 							</div>
@@ -68,7 +68,7 @@
 									v-model="form.email"
 									placeholder="Email"
 								/>
-								<label for="formPhone">Email</label>
+								<label for="formEmail">Email</label>
 							</div>
 							<div class="form-floating mb-4">
 								<input
@@ -76,9 +76,9 @@
 									class="form-control"
 									id="formClass"
 									v-model="form.class_id"
-									placeholder="Email"
+									placeholder="Class"
 								/>
-								<label for="formPhone">Class</label>
+								<label for="formClass">Class</label>
 							</div>
 						</form>
 					</div>
@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import store from "@/store";
 
 export default {
 	name: "SignupCreateModal",
@@ -125,20 +125,10 @@ export default {
 		};
 	},
 	methods: {
-		createSignup() {
-			axios
-				.post("/signup", this.form)
-				.then((res) => {
-					this.response = res.data;
-					console.error(res);
-				})
-				.catch((error) => {
-					console.error(error);
-				});
+		async createSignup() {
+			await store.dispatch("createSignup", this.form);
+			this.data = store.getters.signups;
 		},
-	},
-	created() {
-		// this.createSignup();
 	},
 };
 </script>

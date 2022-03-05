@@ -26,7 +26,30 @@
 				<router-link to="/" class="py-2 text-dark text-decoration-none"
 					>Home</router-link
 				>
+				<button
+					type="button"
+					class="btn"
+					data-bs-toggle="modal"
+					data-bs-target="#loginModal"
+				>
+					{{ isAuthenticated ? "Login" : "Logout" }}
+				</button>
 			</nav>
 		</div>
+		<auth-modal></auth-modal>
 	</header>
 </template>
+
+<script>
+import AuthModal from "@/components/views/LoginModal.vue";
+// import store from "@/store";
+
+export default {
+	components: { AuthModal },
+	data() {
+		return {
+			isAuthenticated: false,
+		};
+	},
+};
+</script>
