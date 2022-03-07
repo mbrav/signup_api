@@ -1,7 +1,6 @@
 import logging
 from typing import List, Optional
 
-from fastapi import FastAPI
 from pydantic import AmqpDsn, AnyHttpUrl, BaseSettings, Field
 
 
@@ -61,8 +60,8 @@ class SQLiteMixin(DBSettings):
     SQLITE_DATABASE_MEMORY: str = 'sqlite:///:memory:'
 
 
-class ServiceMixin(SettingsBase):
-    """Service Settings Mixin"""
+class AuthServiceMixin(SettingsBase):
+    """Auth Service Settings Mixin"""
 
     CRYPT_ALGORITHM: str = Field(
         env='CRYPT_ALGORITHM', default='HS256')
@@ -71,12 +70,30 @@ class ServiceMixin(SettingsBase):
     BACKEND_CORS_ORIGINS: Optional[List[AnyHttpUrl]] = Field(
         env='BACKEND_CORS_ORIGINS')
 
-    TELEGRAM_TOKEN: Optional[str] = Field(env='TELEGRAM_TOKEN')
+
+class ExternalServiceMixin(SettingsBase):
+    """External Service Settings Mixin for bots, APIs etc."""
+
+    TELEGRAM_BOT_API_KEY: Optional[str] = Field(env='TELEGRAM_BOT_API_KEY')
+
+    WEBHOOK_HOST: Optional[str] = Field(env='WEBHOOK_HOST')
+    WEBHOOK_PATH: Optional[str] = Field(env='WEBHOOK_PATH', default='/bot')
+
     CAL_API_KEY: Optional[str] = Field(env='CAL_API_KEY')
     CAL_ID: Optional[str] = Field(env='CAL_ID')
 
+    @property
+    def WEBHOOK_URL(self) -> str:
+        url = f'{self.WEBHOOK_HOST}{self.WEBHOOK_PATH}'
+        return url
 
-class Settings(MySQLMixin, SQLiteMixin, ServiceMixin):
+
+class Settings(
+        MySQLMixin,
+        SQLiteMixin,
+        AuthServiceMixin,
+        ExternalServiceMixin
+):
     """Combined Settings with previous settings as mixins"""
     pass
 
@@ -103,10 +120,3 @@ if settings.LOGGING:
 
     # logging.getLogger('sqlalchemy.engine').setLevel(logger_level)
     logging.getLogger('sqlalchemy.pool').setLevel(logger_level)
-
-app = FastAPI(
-    title='API service for signups and Telegram integration',
-    docs_url='/docs',
-    version='0.1.3',
-    redoc_url='/redocs'
-)

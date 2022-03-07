@@ -16,6 +16,7 @@ python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["argon2"], version = "*"}
 python-multipart = "*"
 httpx = {extras = ["http2"], version = "*"}
+aiogram = "*"
 
 
 [tool.poetry.dev-dependencies]
