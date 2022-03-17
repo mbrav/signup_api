@@ -26,7 +26,7 @@ async def create_superuser(
         user_in = schemas.UserCreate(
             username=username,
             password=hashed_password,
-            is_superuser=True)
+            is_admin=True)
         new_user = models.User(**user_in.dict())
         db_session.add(new_user)
         db_session.commit()

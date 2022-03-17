@@ -26,7 +26,7 @@ class UserUpdate(UserBase):
 
 
 class UserCreate(UserUpdate):
-    is_superuser: Optional[bool] = False
+    is_admin: Optional[bool] = False
     is_active: Optional[bool] = True
 
     class Config:
@@ -34,7 +34,7 @@ class UserCreate(UserUpdate):
 
 
 class User(UserCreate):
-    is_superuser: Optional[bool] = False
+    is_admin: Optional[bool] = False
     is_active: Optional[bool] = True
 
     class Config:

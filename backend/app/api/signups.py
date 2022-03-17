@@ -42,7 +42,7 @@ async def signup_post(
     response_model=schemas.SignupOut)
 async def signup_get(
     id: int,
-    # user: models.User = Depends(get_active_user),
+    user: models.User = Depends(get_active_user),
     db_session: Session = Depends(db.get_database),
 ) -> models.Signup:
     """Retrieve signups object with GET request"""
@@ -61,7 +61,7 @@ async def signup_get(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.SignupOut])
 async def signups_list(
-    # user: models.User = Depends(get_active_user),
+    user: models.User = Depends(get_active_user),
     db_session: Session = Depends(db.get_database)
 ):
     """List signups with GET request"""

@@ -56,7 +56,7 @@ async def get_active_superuser(
     current_user: models.User = Depends(get_auth_user),
 ) -> models.User:
     """Check if user is supperuser"""
-    if not current_user.is_superuser:
+    if not current_user.is_admin:
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )
