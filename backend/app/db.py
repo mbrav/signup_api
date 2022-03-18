@@ -10,24 +10,24 @@ from app.config import settings
 
 engine = None
 
-# if settings.TESTING:
-#     # Create sqlite database if testing
-#     engine = create_async_engine(
-#         settings.SQLITE_DATABASE_FILE,
-#         future=True,
-#         echo=True,
-#         connect_args={'check_same_thread': False}
-#     )
-# else:
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    future=True,
-    echo=False,
-    pool_pre_ping=True,
-    echo_pool=True,
-    pool_size=20,
-    max_overflow=20
-)
+if settings.TESTING:
+    # Create sqlite database if testing
+    engine = create_async_engine(
+        settings.SQLITE_DATABASE_FILE,
+        future=True,
+        echo=settings.DEBUG,
+        connect_args={'check_same_thread': False}
+    )
+else:
+    engine = create_async_engine(
+        settings.DATABASE_URL,
+        future=True,
+        echo=settings.DEBUG,
+        pool_pre_ping=True,
+        echo_pool=True,
+        pool_size=20,
+        max_overflow=20
+    )
 
 
 Session = sessionmaker(

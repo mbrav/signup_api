@@ -4,6 +4,7 @@ import pytest
 from app import models, schemas
 from app.config import settings
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 
@@ -26,8 +27,9 @@ class TestAuth:
         json_res = response.json()
 
         model = models.User
-        created_user = db_session.query(model).filter(
-            model.username == new_login['username']).first()
+        stmt = select(model).where(model.username == new_login['username'])
+        result = await db_session.execute(stmt)
+        created_user = result.scalars().first()
 
         assert response.status_code == 201
         assert json_res['username'] == new_login['username']

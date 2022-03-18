@@ -18,7 +18,7 @@ google_cal = GoogleCal(
 app = FastAPI(
     title='API service for signups and Telegram integration',
     docs_url='/docs',
-    version='0.1.3',
+    version='0.1.4',
     redoc_url='/redocs',
 )
 

@@ -74,8 +74,8 @@ class PostgresMixin(DBSettings):
 class SQLiteMixin(DBSettings):
     """"SQLite Settings Mixin"""
 
-    SQLITE_DATABASE_FILE: str = 'sqlite:///./api.db'
-    SQLITE_DATABASE_MEMORY: str = 'sqlite:///:memory:'
+    SQLITE_DATABASE_FILE: str = 'sqlite+aiosqlite:///./api.db'
+    SQLITE_DATABASE_MEMORY: str = 'sqlite+aiosqlite:///:memory:'
 
 
 class AuthServiceMixin(SettingsBase):
