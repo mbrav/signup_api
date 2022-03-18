@@ -4,7 +4,8 @@ from app import db, models, schemas
 from app.services import AuthService
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .deps import auth_service, get_active_user
 
@@ -14,7 +15,7 @@ router = APIRouter()
 @router.post(path='/token', response_model=schemas.Token)
 async def access_token_login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db_session: Session = Depends(db.get_database)
+    db_session: AsyncSession = Depends(db.get_database)
 ) -> schemas.Token:
     """Get token based on provided OAuth2 credentials"""
 
@@ -30,7 +31,7 @@ async def access_token_login(
             headers={'WWW-Authenticate': 'Bearer'})
     access_token_expires = timedelta(minutes=auth_service.TOKEN_EXPIRE_MINUTES)
     data = {'sub': user.username}
-    access_token = auth_service.create_access_token(
+    access_token = await auth_service.create_access_token(
         data=data,
         expires_delta=access_token_expires)
 
@@ -46,25 +47,26 @@ async def access_token_login(
     status_code=status.HTTP_201_CREATED)
 async def user_register(
     schema: schemas.UserLogin,
-    db_session: Session = Depends(db.get_database)
+    db_session: AsyncSession = Depends(db.get_database)
 ) -> models.User:
     """Register new user"""
 
-    async def create() -> models.User:
-        user = db_session.query(
-            models.User).filter(
-            models.User.username == schema.username).first()
-        if user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Username '{schema.username}' already taken",
-                headers={'WWW-Authenticate': 'Bearer'})
-        hashed_password = auth_service.hash_password(schema.password)
-        new_object = models.User(
-            username=schema.username,
-            password=hashed_password)
-        db_session.add(new_object)
-        db_session.commit()
-        db_session.refresh(new_object)
-        return new_object
-    return await create()
+    model = models.User
+
+    stmt = select(model).where(model.username == schema.username)
+    result = await db_session.execute(stmt)
+    user = result.scalars().first()
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Username '{schema.username}' already taken",
+            headers={'WWW-Authenticate': 'Bearer'})
+
+    hashed_password = auth_service.hash_password(schema.password)
+    new_object = model(
+        username=schema.username,
+        password=hashed_password)
+
+    db_session.add(new_object)
+    await db_session.commit()
+    return new_object

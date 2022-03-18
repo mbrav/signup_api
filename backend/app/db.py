@@ -1,7 +1,8 @@
-from typing import Generator
+from typing import AsyncGenerator
 
 from fastapi import HTTPException
-from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -9,37 +10,46 @@ from app.config import settings
 
 engine = None
 
-if settings.TESTING:
-    # Create sqlite database if testing
-    engine = create_engine(
-        settings.SQLITE_DATABASE_FILE,
-        connect_args={'check_same_thread': False})
-else:
-    engine = create_engine(
-        settings.DATABASE_URL,
-        pool_pre_ping=True,
-        echo_pool=True,
-        pool_size=20,
-        max_overflow=20)
+# if settings.TESTING:
+#     # Create sqlite database if testing
+#     engine = create_async_engine(
+#         settings.SQLITE_DATABASE_FILE,
+#         future=True,
+#         echo=True,
+#         connect_args={'check_same_thread': False}
+#     )
+# else:
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    future=True,
+    echo=False,
+    pool_pre_ping=True,
+    echo_pool=True,
+    pool_size=20,
+    max_overflow=20
+)
 
 
 Session = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine)
+    bind=engine,
+    expire_on_commit=False,
+    class_=AsyncSession
+)
 
 Base = declarative_base()
 
 
-async def get_database() -> Generator:
-    """Fresh implementation of 0.74 feature
-    https://github.com/tiangolo/fastapi/releases/tag/0.74.0
-    """
-    with Session() as session:
+# Dependency
+async def get_database() -> AsyncGenerator:
+    async with Session() as session:
         try:
             yield session
-        except HTTPException:
+            await session.commit()
+        except SQLAlchemyError as sql_ex:
+            await session.rollback()
+            raise sql_ex
+        except HTTPException as http_ex:
             session.rollback()
-            raise
+            raise http_ex
         finally:
-            session.close()
+            await session.close()

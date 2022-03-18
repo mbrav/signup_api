@@ -7,6 +7,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 context = CryptContext(schemes=['argon2'], deprecated='auto')
@@ -33,15 +34,17 @@ class AuthService:
         self.oauth2_scheme = oauth2_scheme
 
     @staticmethod
-    def get_user(
+    async def get_user(
         username: str,
         db_session: Session = Depends(db.get_database)
     ) -> models.User:
         """Get user from database"""
-
         model = models.User
-        user = db_session.query(model).filter(
-            model.username == username).first()
+
+        stmt = select(model).where(model.username == username)
+        result = await db_session.execute(stmt)
+        user = result.scalars().first()
+
         if user is None:
             raise HTTPException(
                 status_code=404,
@@ -67,14 +70,14 @@ class AuthService:
         db_session: Session = Depends(db.get_database)
     ) -> models.User:
         """Authenticate user"""
-        user = self.get_user(username=username, db_session=db_session)
+        user = await self.get_user(username=username, db_session=db_session)
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):
             return False
         return user
 
-    def create_access_token(
+    async def create_access_token(
         self,
         data: dict,
         expires_delta: Optional[timedelta] = None

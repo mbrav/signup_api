@@ -2,7 +2,8 @@ from app import db, models, schemas
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .deps import auth_service, get_active_user
 
@@ -20,20 +21,22 @@ async def signup_post(
     # See https://fastapi.tiangolo.com/tutorial/dependencies/classes-as-dependencies/
     # model: models.Signup = Depends(models.Signup),
 
-    db_session: Session = Depends(db.get_database)
+    db_session: AsyncSession = Depends(db.get_database)
 ) -> models.Signup:
     """Generate new signup with POST request"""
 
     # Instead of this
     model = models.Signup
 
-    async def create():
-        new_object = model(**schema.dict())
-        db_session.add(new_object)
-        db_session.commit()
-        db_session.refresh(new_object)
-        return new_object
-    return await create()
+    new_object = model(**schema.dict())
+
+    db_session.add(new_object)
+    return await db_session.commit()
+
+    # Fix error
+    # greenlet_spawn has not been called; can't call await_() here.
+    # Was IO attempted in an unexpected place?
+    return new_object
 
 
 @router.get(
@@ -43,12 +46,16 @@ async def signup_post(
 async def signup_get(
     id: int,
     user: models.User = Depends(get_active_user),
-    db_session: Session = Depends(db.get_database),
+    db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Signup:
     """Retrieve signups object with GET request"""
 
     model = models.Signup
-    get_object = db_session.query(model).filter(model.id == id).first()
+
+    stmt = select(model).where(model.id == id)
+    result = await db_session.execute(stmt)
+    get_object = result.scalars().first()
+
     if not get_object:
         detail = f'Signup with id {id} was not found'
         raise HTTPException(
@@ -62,12 +69,18 @@ async def signup_get(
     response_model=LimitOffsetPage[schemas.SignupOut])
 async def signups_list(
     user: models.User = Depends(get_active_user),
-    db_session: Session = Depends(db.get_database)
+    db_session: AsyncSession = Depends(db.get_database)
 ):
     """List signups with GET request"""
 
     model = models.Signup
-    return paginate(db_session.query(model).order_by(model.id.desc()))
+
+    stmt = select(model).order_by(model.id.desc())
+    result = await db_session.execute(stmt)
+    get_objects = result.scalars().all()
+
+    # Fix pagination
+    return paginate(result)
 
 
 add_pagination(router)

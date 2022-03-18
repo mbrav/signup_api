@@ -11,7 +11,7 @@ fastapi-pagination = {extras = ["sqlalchemy"], version = "*"}
 pydantic = {extras = ["email", "dotenv"], version = "*"}
 uvicorn = {extras = ["standard"], version = "*"}
 SQLAlchemy = "*"
-PyMySQL = "*"
+asyncpg = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["argon2"], version = "*"}
 python-multipart = "*"

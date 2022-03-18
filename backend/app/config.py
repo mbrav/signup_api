@@ -41,7 +41,7 @@ class MySQLMixin(DBSettings):
     MYSQL_USER: Optional[str] = Field(env='MYSQL_USER')
     MYSQL_PASSWORD: Optional[str] = Field(env='MYSQL_PASSWORD')
     MYSQL_HOST: Optional[str] = Field(env='MYSQL_HOST')
-    MYSQL_PORT: Optional[str] = Field(env='MYSQL_PORT')
+    MYSQL_PORT: Optional[int] = Field(env='MYSQL_PORT')
     MYSQL_NAME: Optional[str] = Field(env='MYSQL_NAME')
 
     @property
@@ -50,6 +50,24 @@ class MySQLMixin(DBSettings):
             f'{self.MYSQL_USER}:' \
             f'{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}/' \
             f'{self.MYSQL_NAME}?charset=utf8mb4'
+        return url
+
+
+class PostgresMixin(DBSettings):
+    """"Postgres Settings Mixin"""
+
+    PG_USER: Optional[str] = Field(env='PG_USER')
+    PG_PASSWORD: Optional[str] = Field(env='PG_PASSWORD')
+    PG_HOST: Optional[str] = Field(env='PG_HOST')
+    PG_PORT: Optional[int] = Field(env='PG_PORT', default=5432)
+    PG_DB: Optional[str] = Field(env='PG_DB')
+
+    @property
+    def DATABASE_URL(self) -> str:
+        url = f'postgresql+asyncpg://' \
+            f'{self.PG_USER}:' \
+            f'{self.PG_PASSWORD}@{self.PG_HOST}:' \
+            f'{self.PG_PORT}/{self.PG_DB}'
         return url
 
 
@@ -89,7 +107,7 @@ class ExternalServiceMixin(SettingsBase):
 
 
 class Settings(
-        MySQLMixin,
+        PostgresMixin,
         SQLiteMixin,
         AuthServiceMixin,
         ExternalServiceMixin

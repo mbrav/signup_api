@@ -4,7 +4,7 @@ from app.services import AuthService
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 auth_service = AuthService(
     secret=settings.SECRET_KEY,
@@ -13,7 +13,7 @@ auth_service = AuthService(
 
 
 async def get_auth_user(
-    db_session: Session = Depends(db.get_database),
+    db_session: AsyncSession = Depends(db.get_database),
     token: str = Depends(auth_service.oauth2_scheme)
 ) -> models.User:
     """Get user object based on provided credentials from database"""
@@ -33,7 +33,7 @@ async def get_auth_user(
     except (JWTError, ValidationError):
         raise credentials_exception
 
-    user = auth_service.get_user(
+    user = await auth_service.get_user(
         db_session=db_session,
         username=token_data.username)
     if user is None:
