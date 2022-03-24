@@ -39,12 +39,8 @@ class AuthService:
         db_session: Session = Depends(db.get_database)
     ) -> models.User:
         """Get user from database"""
-        model = models.User
 
-        stmt = select(model).where(model.username == username)
-        result = await db_session.execute(stmt)
-        user = result.scalars().first()
-
+        user = await models.User.get(db_session, username=username)
         if user is None:
             raise HTTPException(
                 status_code=404,

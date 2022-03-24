@@ -5,7 +5,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .deps import auth_service, get_active_user
+from .deps import get_active_user
 
 router = APIRouter()
 
@@ -16,26 +16,13 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED)
 async def signup_post(
     schema: schemas.SignupCreate,
-
-    # TODO Figure out how to pass a SQLachemy model as a dependency
-    # See https://fastapi.tiangolo.com/tutorial/dependencies/classes-as-dependencies/
-    # model: models.Signup = Depends(models.Signup),
-
     db_session: AsyncSession = Depends(db.get_database)
 ) -> models.Signup:
     """Generate new signup with POST request"""
 
-    # Instead of this
-    model = models.Signup
-
-    new_object = model(**schema.dict())
-
-    db_session.add(new_object)
-    return await db_session.commit()
-
-    # Fix error
-    # greenlet_spawn has not been called; can't call await_() here.
-    # Was IO attempted in an unexpected place?
+    new_object = models.Signup(**schema.dict())
+    await new_object.save(db_session)
+    await db_session.refresh(new_object)
     return new_object
 
 
@@ -50,11 +37,7 @@ async def signup_get(
 ) -> models.Signup:
     """Retrieve signups object with GET request"""
 
-    model = models.Signup
-
-    stmt = select(model).where(model.id == id)
-    result = await db_session.execute(stmt)
-    get_object = result.scalars().first()
+    get_object = await models.Signup.get(db_session, id=id)
 
     if not get_object:
         detail = f'Signup with id {id} was not found'
@@ -72,6 +55,8 @@ async def signups_list(
     db_session: AsyncSession = Depends(db.get_database)
 ):
     """List signups with GET request"""
+
+    from sqlalchemy import select
 
     model = models.Signup
 

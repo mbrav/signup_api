@@ -41,26 +41,27 @@ if settings.BACKEND_CORS_ORIGINS:
 
 async def start_db():
     async with db.engine.begin() as conn:
-        # await conn.run_sync(models.Base.metadata.drop_all)
+        if settings.TESTING:
+            await conn.run_sync(models.Base.metadata.drop_all)
         await conn.run_sync(models.Base.metadata.create_all)
     await db.engine.dispose()
 
 
-@app.on_event("startup")
+@app.on_event('startup')
 async def startup_event():
-    # logger.info("Starting up...")
+    # logger.info('Starting up...')
     # google_cal.get()
-    # if settings.FIRST_SUPERUSER:
-    #     await create_superuser(
-    #         username=settings.FIRST_SUPERUSER,
-    #         password=settings.FIRST_SUPERUSER_PASSWORD)
     await start_db()
+    if settings.FIRST_SUPERUSER:
+        await create_superuser(
+            username=settings.FIRST_SUPERUSER,
+            password=settings.FIRST_SUPERUSER_PASSWORD)
 
 
-@app.on_event("shutdown")
+@app.on_event('shutdown')
 async def shutdown_event():
     pass
-    # logger.info("Shutting down...")
+    # logger.info('Shutting down...')
 
 if __name__ == '__main__':
     import uvicorn

@@ -6,7 +6,7 @@ An asynchronous Fast API service for signups and Telegram integration.
 
 ### Intent
 
-As of now, this project is an experimental ground that uses [FastAPI](https://fastapi.tiangolo.com/) as a base framework with the following stack:
+As of now, this project is mainly an **architecture design** experimental ground with an abstract end goal in mind, rather than an actual functioning app and therefore would be most useful if used as a starting template example. The project uses [FastAPI](https://fastapi.tiangolo.com/) as a base framework with the following stack:
 
 -   Integration with [SQLAlchemy's](https://www.sqlalchemy.org/) new ORM statement paradigm to be implemented in [v2.0](https://docs.sqlalchemy.org/en/20/changelog/migration_20.html);
 -   Asynchronous PostgreSQL databse via [asyncpg](https://github.com/MagicStack/asyncpg), one of the fastest and high performant Database Client Libraries for python/asyncio;

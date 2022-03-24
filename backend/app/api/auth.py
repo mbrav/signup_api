@@ -51,11 +51,7 @@ async def user_register(
 ) -> models.User:
     """Register new user"""
 
-    model = models.User
-
-    stmt = select(model).where(model.username == schema.username)
-    result = await db_session.execute(stmt)
-    user = result.scalars().first()
+    user = await models.User.get(db_session, username=schema.username)
     if user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,10 +59,10 @@ async def user_register(
             headers={'WWW-Authenticate': 'Bearer'})
 
     hashed_password = auth_service.hash_password(schema.password)
-    new_object = model(
+    new_object = models.User(
         username=schema.username,
         password=hashed_password)
 
-    db_session.add(new_object)
-    await db_session.commit()
+    await new_object.save(db_session)
+    await db_session.refresh(new_object)
     return new_object

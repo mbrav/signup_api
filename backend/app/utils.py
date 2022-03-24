@@ -1,17 +1,15 @@
 import random
 import string
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from app import db, models, schemas
 from app.api import auth_service
-from app.models import to_snake_case
 
 
 async def create_superuser(
     username: str,
     password: str,
-    session: Session = db.Session
 ) -> None:
     """
     Tables should be created with Alembic migrations
@@ -19,8 +17,10 @@ async def create_superuser(
     the tables un-commenting the next line
     Base.metadata.create_all(bind=engine)
     """
-    db_session = session()
-    user = db_session.query(models.User).count() != 0
+
+    db_session = db.Session()
+    user = await models.User.get(db_session)
+
     if not user:
         hashed_password = auth_service.hash_password(password)
         user_in = schemas.UserCreate(
@@ -29,8 +29,7 @@ async def create_superuser(
             is_admin=True)
         new_user = models.User(**user_in.dict())
         db_session.add(new_user)
-        db_session.commit()
-        db_session.refresh(new_user)
+        await db_session.commit()
 
 
 def random_lower_string(num: int = 20) -> str:
