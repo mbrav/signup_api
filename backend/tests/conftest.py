@@ -2,23 +2,23 @@
 5 Scopes of Pytest Fixtures
 
 Pytest fixtures have five different scopes: function, class, module, package, and session.
+
+Testing FastAPI Endpoints with Docker and Pytest
+https://www.jeffastor.com/blog/testing-fastapi-endpoints-with-docker-and-pytest
 """
 
-from typing import Generator
+from typing import AsyncGenerator
 
 import pytest
 from app import utils
+from app.api.deps import auth_service
 from app.services import AuthService
-
-
-@pytest.fixture()
-async def db_session() -> Generator:
-    from app.db import Session
-    yield Session()
+from httpx import AsyncClient
+from main import app
 
 
 @pytest.fixture
-async def async_client(scope='session') -> Generator:
+async def async_client(scope='session') -> AsyncGenerator:
     """
     Create a test client connected to the main app instance
     Testing with testclient without async, requires requests
@@ -27,21 +27,17 @@ async def async_client(scope='session') -> Generator:
     from fastapi.testclient import TestClient
     return await AsyncClient(app=app)
     """
-
-    from httpx import AsyncClient
-    from main import app
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
 
 
 @pytest.fixture
 async def authservice(scope='session') -> AuthService:
-    from app.api.deps import auth_service
     return auth_service
 
 
 @pytest.fixture
-async def new_login(scope="function") -> dict:
+async def new_login(scope='function') -> dict:
     data = {
         'username': utils.random_lower_string(10),
         'password': utils.random_id_string(30),
@@ -50,7 +46,7 @@ async def new_login(scope="function") -> dict:
 
 
 @pytest.fixture
-async def new_signup(scope="function") -> dict:
+async def new_signup(scope='function') -> dict:
     data = {
         'first_name': utils.random_lower_string(10).capitalize(),
         'last_name': utils.random_lower_string(12).capitalize(),

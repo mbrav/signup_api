@@ -28,8 +28,7 @@ async def create_superuser(
             password=hashed_password,
             is_admin=True)
         new_user = models.User(**user_in.dict())
-        db_session.add(new_user)
-        await db_session.commit()
+        await new_user.save(db_session)
 
 
 def random_lower_string(num: int = 20) -> str:

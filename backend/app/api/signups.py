@@ -2,7 +2,6 @@ from app import db, models, schemas
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .deps import get_active_user
@@ -21,9 +20,7 @@ async def signup_post(
     """Generate new signup with POST request"""
 
     new_object = models.Signup(**schema.dict())
-    await new_object.save(db_session)
-    await db_session.refresh(new_object)
-    return new_object
+    return await new_object.save(db_session)
 
 
 @router.get(

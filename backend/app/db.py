@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Generator
 
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from app.config import settings
 
 engine = None
+Session = None
 
 if settings.TESTING:
     # Create sqlite database if testing
@@ -16,6 +17,12 @@ if settings.TESTING:
         echo=settings.DEBUG,
         future=True,
         connect_args={'check_same_thread': False}
+    )
+    Session = sessionmaker(
+        bind=engine,
+        autocommit=False,
+        autoflush=False,
+        class_=AsyncSession
     )
 else:
     engine = create_async_engine(
@@ -27,13 +34,11 @@ else:
         pool_size=20,
         max_overflow=20
     )
-
-
-Session = sessionmaker(
-    bind=engine,
-    expire_on_commit=False,
-    class_=AsyncSession
-)
+    Session = sessionmaker(
+        bind=engine,
+        expire_on_commit=False,
+        class_=AsyncSession
+    )
 
 
 # Dependency

@@ -1,10 +1,8 @@
 from datetime import timedelta
 
 from app import db, models, schemas
-from app.services import AuthService
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .deps import auth_service, get_active_user
@@ -63,6 +61,4 @@ async def user_register(
         username=schema.username,
         password=hashed_password)
 
-    await new_object.save(db_session)
-    await db_session.refresh(new_object)
-    return new_object
+    return await new_object.save(db_session)

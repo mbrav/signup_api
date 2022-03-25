@@ -5,15 +5,16 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app import api, db, middleware, models
 from app.config import settings
-from app.services import GoogleCal, tg_router
+# from app.services import GoogleCal, tg_router
 from app.utils import create_superuser
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-google_cal = GoogleCal(
-    api_key=settings.CAL_API_KEY,
-    cal_id=settings.CAL_ID,
-)
+# google_cal = GoogleCal(
+#     api_key=settings.CAL_API_KEY,
+#     cal_id=settings.CAL_ID,
+# )
 
 app = FastAPI(
     title='API service for signups and Telegram integration',
@@ -49,7 +50,7 @@ async def start_db():
 
 @app.on_event('startup')
 async def startup_event():
-    # logger.info('Starting up...')
+    logger.info('FastAPI starting up...')
     # google_cal.get()
     await start_db()
     if settings.FIRST_SUPERUSER:
@@ -60,8 +61,7 @@ async def startup_event():
 
 @app.on_event('shutdown')
 async def shutdown_event():
-    pass
-    # logger.info('Shutting down...')
+    logger.info('FastAPI shutting down...')
 
 if __name__ == '__main__':
     import uvicorn

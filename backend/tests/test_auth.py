@@ -1,11 +1,8 @@
 from typing import Dict
 
 import pytest
-from app import models, schemas
 from app.config import settings
 from httpx import AsyncClient
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 
 class TestAuth:
@@ -17,7 +14,6 @@ class TestAuth:
     @pytest.mark.asyncio
     async def test_registration(
         self,
-        db_session: Session,
         async_client: AsyncClient,
         new_login: dict
     ) -> dict:
@@ -26,24 +22,17 @@ class TestAuth:
             f'{settings.API_V1_STR}/auth/register', json=new_login)
         json_res = response.json()
 
-        model = models.User
-        stmt = select(model).where(model.username == new_login['username'])
-        result = await db_session.execute(stmt)
-        created_user = result.scalars().first()
-
         assert response.status_code == 201
         assert json_res['username'] == new_login['username']
-        assert created_user
         return new_login
 
     @pytest.mark.asyncio
     async def test_token_get(
         self,
-        db_session: Session,
         async_client: AsyncClient,
         new_login: dict
     ) -> dict:
-        test_login = await self.test_registration(db_session, async_client, new_login)
+        test_login = await self.test_registration(async_client, new_login)
 
         response = await async_client.post(
             f'{settings.API_V1_STR}/auth/token', data=test_login)
@@ -57,12 +46,11 @@ class TestAuth:
     @pytest.mark.asyncio
     async def test_token_use(
         self,
-        db_session: Session,
         async_client: AsyncClient,
-        new_login: dict
+        new_login: Dict
     ) -> None:
 
-        token = await self.test_token_get(db_session, async_client, new_login)
+        token = await self.test_token_get(async_client, new_login)
 
         headers = {
             'Authorization': f'{token["token_type"]} {token["access_token"]}'

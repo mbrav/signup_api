@@ -32,6 +32,26 @@ class BaseModel(Base):
     def __tablename__(self) -> str:
         return to_snake_case(self.__name__) + 's'
 
+    async def save(self, db_session: AsyncSession):
+        """Save object
+        Save method is not a @classmethod since we need an instantiated object 
+
+        Args:
+            db_session (AsyncSession): Current db session
+
+        Raises:
+            HTTPException: Raise SQLAlchemy error
+        """
+        try:
+            db_session.add(self)
+            await db_session.commit()
+            await db_session.refresh(self)
+            return self
+        except SQLAlchemyError as ex:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=repr(ex))
+
     @classmethod
     async def get(
         self,
@@ -41,12 +61,12 @@ class BaseModel(Base):
     ):
         """Get object based on query or id identified by kwarg
         If no query or id is passed, value is returned based on whether
-        any tables exist on the table or not.
+        any tables exist in the table or not.
 
         Args:
             db_session (AsyncSession): Current db session
             query (select, optional): Query. Defaults to None.
-            kwarg (select, optional): Object attribute and value by which
+            kwarg (optional): Object attribute and value by which
                 to get object. Defaults to None.
 
         Raises:
@@ -66,24 +86,6 @@ class BaseModel(Base):
         try:
             result = await db_session.execute(query)
             return result.scalars().first()
-        except SQLAlchemyError as ex:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=repr(ex))
-
-    @classmethod
-    async def save(self, db_session: AsyncSession):
-        """Save object
-
-        Args:
-            db_session (AsyncSession): Current db session
-
-        Raises:
-            HTTPException: Raise SQLAlchemy error
-        """
-        try:
-            db_session.add(self)
-            await db_session.commit()
         except SQLAlchemyError as ex:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
