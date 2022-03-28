@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
@@ -16,12 +17,28 @@ logger = logging.getLogger(__name__)
 #     cal_id=settings.CAL_ID,
 # )
 
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(FILE_DIR)
+with open(f'{REPO_DIR}/README.md') as f:
+    description = f.read()
+
 app = FastAPI(
     title='API service for signups and Telegram integration',
+    description=description,
+    contact={
+        'name': 'mbrav',
+        'url': 'https://github.com/mbrav',
+        'email': 'mbrav@protonmail.com',
+    },
+    license_info={
+        'name': 'GNU 3.0',
+        'url': 'https://www.gnu.org/licenses/gpl-3.0.en.html',
+    },
     docs_url='/docs',
-    version='0.1.4',
+    version=settings.VERSION,
     redoc_url='/redocs',
 )
+
 
 app.include_router(api.api_router, prefix=settings.API_V1_STR)
 # app.include_router(tg_router, prefix=settings.WEBHOOK_PATH,
@@ -34,7 +51,7 @@ if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.BACKEND_CORS_ORIGINS,
-        # allow_credentials=True,
+        allow_credentials=True,
         allow_methods=['*'],
         allow_headers=['*'],
     )

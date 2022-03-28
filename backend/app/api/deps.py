@@ -1,7 +1,7 @@
 from app import db, models, schemas
 from app.config import settings
 from app.services import AuthService
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from jose import JWTError, jwt
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,12 +11,28 @@ auth_service = AuthService(
     algorithm=settings.CRYPT_ALGORITHM,
     expire=settings.TOKEN_EXPIRE_MINUTES)
 
+SortByQuery = Query(
+    None,
+    title='Sort by column',
+    description='Name of column to sort by',
+)
+
+SortByDescQuery = Query(
+    True,
+    title='Sort descending',
+)
+
+FilterQuery = Query(
+    None,
+    title='Filter by column'
+)
+
 
 async def get_auth_user(
     db_session: AsyncSession = Depends(db.get_database),
     token: str = Depends(auth_service.oauth2_scheme)
 ) -> models.User:
-    """Get user object based on provided credentials from database"""
+    """Get user object based on provided credentials"""
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -24,8 +40,9 @@ async def get_auth_user(
         headers={'WWW-Authenticate': 'Bearer'})
 
     try:
-        payload = jwt.decode(token, auth_service.SECRET_KEY,
-                             algorithms=[auth_service.CRYPT_ALGORITHM])
+        payload = jwt.decode(
+            token, auth_service.SECRET_KEY,
+            algorithms=[auth_service.CRYPT_ALGORITHM])
         username: str = payload.get('sub')
         if username is None:
             raise credentials_exception
@@ -48,16 +65,19 @@ async def get_active_user(
     """Check if user is active"""
 
     if current_user.is_active is False:
-        raise HTTPException(status_code=400, detail='Inactive user')
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Inactive user')
     return current_user
 
 
 async def get_active_superuser(
     current_user: models.User = Depends(get_auth_user),
 ) -> models.User:
-    """Check if user is supperuser"""
+    """Check for supperuser permissions"""
+
     if not current_user.is_admin:
         raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
-        )
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user doesn't have enough privileges")
     return current_user

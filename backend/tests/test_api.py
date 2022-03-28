@@ -1,6 +1,8 @@
 import pytest
+from app import models
 from app.config import settings
 from httpx import AsyncClient
+from sqlalchemy.orm import Session
 
 
 class TestApi:
@@ -15,6 +17,7 @@ class TestApi:
     @pytest.mark.asyncio
     async def test_create_signup(
         self,
+        db_session: Session,
         async_client: AsyncClient,
         new_signup: dict
     ) -> None:
@@ -22,21 +25,10 @@ class TestApi:
         response = await async_client.post(
             f'{settings.API_V1_STR}/signups', json=new_signup)
 
-        assert response.status_code == 201
-
-    @pytest.mark.asyncio
-    async def test_create_signup_response(
-        self,
-        async_client: AsyncClient,
-        new_signup: dict
-    ) -> None:
-
-        response = await async_client.post(
-            f'{settings.API_V1_STR}/signups', json=new_signup)
-
-        created_signup = await async_client.post(
-            f'{settings.API_V1_STR}/signups', json=new_signup)
+        # created_signup = await models.Signup.get(
+        #     db_session, last_name=new_signup['last_name'], raise_404=False)
 
         assert response.status_code == 201
-        assert created_signup
+        # assert response.status_code == response
+        # assert created_signup
         # assert new_signup.items() <= created_signup.items()

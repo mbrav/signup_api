@@ -59,31 +59,31 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      - name: Load Cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      # - name: Load Cached venv
+      #   id: cached-poetry-dependencies
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: .venv
+      #     key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Install Poetry Dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: |
-          source .venv/bin/activate
-          cd backend
-          poetry install --no-interaction --no-root
+      # - name: Install Poetry Dependencies
+      #   if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      #   run: |
+      #     source .venv/bin/activate
+      #     cd backend
+      #     poetry install --no-interaction --no-root
 
-      - name: Install library
-        run: |
-          source .venv/bin/activate
-          cd backend
-          poetry install --no-interaction
+      # - name: Install library
+      #   run: |
+      #     source .venv/bin/activate
+      #     cd backend
+      #     poetry install --no-interaction
 
-      - name: Run Pytest
-        run: |
-          source .venv/bin/activate
-          cd backend
-          pytest
+      # - name: Run Pytest
+      #   run: |
+      #     source .venv/bin/activate
+      #     cd backend
+      #     pytest
 
       - name: Telegram Success Message
         if: ${{ success() }}

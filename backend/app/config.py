@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-from pydantic import AmqpDsn, AnyHttpUrl, BaseSettings, Field
+from pydantic import AnyHttpUrl, BaseSettings, Field, PostgresDsn
 
 
 class SettingsBase(BaseSettings):
@@ -12,6 +12,8 @@ class SettingsBase(BaseSettings):
         openssl rand -hex 32
 
     """
+
+    VERSION: str = Field('0.1.4')
 
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)
@@ -56,26 +58,22 @@ class MySQLMixin(DBSettings):
 class PostgresMixin(DBSettings):
     """"Postgres Settings Mixin"""
 
-    PG_USER: Optional[str] = Field(env='PG_USER')
-    PG_PASSWORD: Optional[str] = Field(env='PG_PASSWORD')
-    PG_HOST: Optional[str] = Field(env='PG_HOST')
-    PG_PORT: Optional[int] = Field(env='PG_PORT', default=5432)
-    PG_DB: Optional[str] = Field(env='PG_DB')
+    POSTGRES_USER: Optional[str] = Field(
+        env='POSTGRES_USER', default='postgres')
+    POSTGRES_PASSWORD: Optional[str] = Field(
+        env='POSTGRES_PASSWORD', default='postgres')
+    POSTGRES_SERVER: Optional[str] = Field(
+        env='POSTGRES_SERVER', default='db')
+    POSTGRES_PORT: Optional[int] = Field(env='POSTGRES_PORT', default=5432)
+    POSTGRES_DB: Optional[str] = Field(env='POSTGRES_DB', default='postgres')
 
     @property
-    def DATABASE_URL(self) -> str:
+    def DATABASE_URL(self) -> PostgresDsn:
         url = f'postgresql+asyncpg://' \
-            f'{self.PG_USER}:' \
-            f'{self.PG_PASSWORD}@{self.PG_HOST}:' \
-            f'{self.PG_PORT}/{self.PG_DB}'
+            f'{self.POSTGRES_USER}:' \
+            f'{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:' \
+            f'{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
         return url
-
-
-class SQLiteMixin(DBSettings):
-    """"SQLite Settings Mixin"""
-
-    SQLITE_DATABASE_FILE: str = 'sqlite+aiosqlite:///./api.db'
-    SQLITE_DATABASE_MEMORY: str = 'sqlite+aiosqlite:///:memory:'
 
 
 class AuthServiceMixin(SettingsBase):
@@ -108,7 +106,6 @@ class ExternalServiceMixin(SettingsBase):
 
 class Settings(
         PostgresMixin,
-        SQLiteMixin,
         AuthServiceMixin,
         ExternalServiceMixin
 ):
@@ -136,5 +133,5 @@ if settings.LOGGING:
     logger.setLevel(logger_level)
     logger.addHandler(handler)
 
-    # logging.getLogger('sqlalchemy.engine').setLevel(logger_level)
+    logging.getLogger('sqlalchemy.engine').setLevel(logger_level)
     logging.getLogger('sqlalchemy.pool').setLevel(logger_level)

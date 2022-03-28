@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .deps import auth_service, get_active_user
+from .deps import auth_service
 
 router = APIRouter()
 
@@ -49,7 +49,7 @@ async def user_register(
 ) -> models.User:
     """Register new user"""
 
-    user = await models.User.get(db_session, username=schema.username)
+    user = await models.User.get(db_session, username=schema.username, raise_404=False)
     if user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

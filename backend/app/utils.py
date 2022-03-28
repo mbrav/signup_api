@@ -1,8 +1,6 @@
 import random
 import string
 
-from sqlalchemy import select
-
 from app import db, models, schemas
 from app.api import auth_service
 
@@ -19,7 +17,7 @@ async def create_superuser(
     """
 
     db_session = db.Session()
-    user = await models.User.get(db_session)
+    user = await models.User.get(db_session, raise_404=False)
 
     if not user:
         hashed_password = auth_service.hash_password(password)

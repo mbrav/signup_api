@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from app import db, models, schemas
+from app import db, models
 from app.config import settings
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 context = CryptContext(schemes=['argon2'], deprecated='auto')
@@ -41,10 +40,6 @@ class AuthService:
         """Get user from database"""
 
         user = await models.User.get(db_session, username=username)
-        if user is None:
-            raise HTTPException(
-                status_code=404,
-                detail=f"User '{username}' not registered")
         return user
 
     @staticmethod
