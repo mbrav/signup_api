@@ -75,7 +75,7 @@
 									type="text"
 									class="form-control"
 									id="formClass"
-									v-model="form.class_id"
+									v-model="form.event_id"
 									placeholder="Class"
 								/>
 								<label for="formClass">Class</label>
@@ -119,7 +119,7 @@ export default {
 				last_name: "",
 				phone: "",
 				email: "",
-				class_id: "",
+				event_id: "",
 			},
 			response: {},
 		};

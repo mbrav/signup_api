@@ -1,6 +1,6 @@
 from .auth import auth_service
-from .execution_tasks import ExecutableTasks, TaskDetail, tasks_info
-from .google_cal import GoogleCal
-from .scheduler import SchedulerService, get_scheduler, start_scheduler
+from .google_cal import start_calendar
+from .scheduler.main import SchedulerService, get_scheduler, start_scheduler
+from .tasks import ExecutableTasks, TaskDetail, tasks_info
 
 # from .telegram.routes import tg_router

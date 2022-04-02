@@ -42,30 +42,6 @@ async def available_tasks_list(
     return tasks_info
 
 
-@router.get(
-    path='/my',
-    status_code=status.HTTP_200_OK,
-    response_model=LimitOffsetPage[schemas.TaskOut])
-async def tasks_list_by_user(
-    user: models.User = Depends(get_active_user),
-    db_session: AsyncSession = Depends(db.get_database),
-    sort_by: Optional[str] = SortByQuery,
-    desc: Optional[bool] = SortByDescQuery,
-    status: Optional[str] = FilterQuery,
-    result: Optional[str] = FilterQuery,
-):
-    """List tasks with GET request"""
-
-    return await models.Task.paginate(
-        db_session,
-        desc=desc,
-        sort_by=sort_by,
-        user_id=user.id,
-        status=status,
-        result=result
-    )
-
-
 @router.post(
     path='',
     response_model=schemas.TaskOut,
@@ -171,5 +147,28 @@ async def tasks_list(
         result=result
     )
 
+
+@router.get(
+    path='/my',
+    status_code=status.HTTP_200_OK,
+    response_model=LimitOffsetPage[schemas.TaskOut])
+async def tasks_list_by_user(
+    user: models.User = Depends(get_active_user),
+    db_session: AsyncSession = Depends(db.get_database),
+    sort_by: Optional[str] = SortByQuery,
+    desc: Optional[bool] = SortByDescQuery,
+    status: Optional[str] = FilterQuery,
+    result: Optional[str] = FilterQuery,
+):
+    """List tasks of user with GET request"""
+
+    return await models.Task.paginate(
+        db_session,
+        desc=desc,
+        sort_by=sort_by,
+        user_id=user.id,
+        status=status,
+        result=result
+    )
 
 add_pagination(router)

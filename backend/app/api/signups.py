@@ -17,11 +17,12 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED)
 async def signup_post(
     schema: schemas.SignupIn,
-    user: models.User = Depends(get_active_user),
+    user: Optional[models.User] = Depends(get_active_user),
     db_session: AsyncSession = Depends(db.get_database)
 ) -> models.Signup:
     """Create new signup with POST request"""
 
+    schema.user_id = user.id
     new_object = models.Signup(**schema.dict())
     return await new_object.save(db_session)
 
@@ -76,16 +77,16 @@ async def signup_patch(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.SignupOut])
 async def signups_list(
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(get_active_superuser),
     db_session: AsyncSession = Depends(db.get_database),
     sort_by: Optional[str] = SortByQuery,
     desc: Optional[bool] = SortByDescQuery,
+    user_id: Optional[int] = FilterQuery,
+    event_id: Optional[int] = FilterQuery,
     first_name: Optional[str] = FilterQuery,
     last_name: Optional[str] = FilterQuery,
     phone: Optional[str] = FilterQuery,
     email: Optional[str] = FilterQuery,
-    class_id: Optional[str] = FilterQuery,
-    user_id: Optional[int] = FilterQuery
 ):
     """List signups with GET request"""
 
@@ -97,8 +98,29 @@ async def signups_list(
         last_name=last_name,
         phone=phone,
         email=email,
-        class_id=class_id,
+        event_id=event_id,
         user_id=user_id,
     )
+
+
+@router.get(
+    path='/my',
+    status_code=status.HTTP_200_OK,
+    response_model=LimitOffsetPage[schemas.SignupOut])
+async def signups_list_by_user(
+    user: models.User = Depends(get_active_user),
+    db_session: AsyncSession = Depends(db.get_database),
+    sort_by: Optional[str] = SortByQuery,
+    desc: Optional[bool] = SortByDescQuery,
+):
+    """List signups by user with GET request"""
+
+    return await models.Signup.paginate(
+        db_session,
+        desc=desc,
+        sort_by=sort_by,
+        user_id=user.id,
+    )
+
 
 add_pagination(router)

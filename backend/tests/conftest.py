@@ -60,6 +60,6 @@ async def new_signup(scope='function') -> dict:
         'last_name': utils.random_lower_string(12).capitalize(),
         'phone': utils.random_phone(),
         'email': utils.random_email(),
-        'class_id': utils.random_id_string(20),
+        'event_id': utils.random_id_string(20),
     }
     return data

@@ -1,15 +1,17 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class SignupIn(BaseModel):
-    first_name: str
-    last_name: str
-    phone: str
-    email: Optional[EmailStr] = None
-    class_id: Optional[str] = None
+    first_name: Optional[str] = Field(example='Linus')
+    last_name: Optional[str] = Field(example='Trovalds')
+    phone: Optional[str] = Field(example='+12001234545')
+    email: Optional[EmailStr] = Field(example='linus@linux.org')
+
+    user_id: Optional[int] = Field(example=1)
+    event_id: int = Field(example=1)
 
     class Config:
         orm_mode = True
@@ -17,5 +19,4 @@ class SignupIn(BaseModel):
 
 class SignupOut(SignupIn):
     created_at: datetime
-    user_id: Optional[int] = None
-    id: int
+    id: int = Field(example=1)

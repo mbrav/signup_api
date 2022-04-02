@@ -3,7 +3,7 @@ import logging
 from app import db, models
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from .execution_tasks import ExecutableTasks
+from ..tasks import ExecutableTasks
 
 logger = logging.getLogger()
 
@@ -57,6 +57,7 @@ class SchedulerService:
 scheduler = SchedulerService()
 
 
+# Service startup
 async def start_scheduler():
     logger.info('Scheduler service startup BEGIN')
     await scheduler.start()

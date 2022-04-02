@@ -19,7 +19,7 @@
 					<td>{{ signup.last_name }}</td>
 					<td>{{ signup.phone }}</td>
 					<td>{{ signup.email }}</td>
-					<td>{{ signup.class_id }}</td>
+					<td>{{ signup.event_id }}</td>
 				</tr>
 			</tbody>
 		</table>

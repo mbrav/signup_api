@@ -1,10 +1,11 @@
 from fastapi import APIRouter
 
-from . import auth, index, signups, tasks, users
+from . import auth, events, index, signups, tasks, users
 
 api_router = APIRouter()
 api_router.include_router(index.router, tags=['Index'])
 api_router.include_router(auth.router, prefix='/auth', tags=['Auth'])
 api_router.include_router(users.router, prefix='/users', tags=['Users'])
 api_router.include_router(signups.router, prefix='/signups', tags=['Signups'])
+api_router.include_router(events.router, prefix='/events', tags=['Events'])
 api_router.include_router(tasks.router, prefix='/tasks', tags=['Tasks'])

@@ -37,7 +37,7 @@ class TestLocust(HttpUser):
             'last_name': random_lower_string(12).capitalize(),
             'phone': random_phone(),
             'email': random_email(),
-            'class_id': random_id_string(20),
+            'event_id': random_id_string(20),
         }
         self.client.post('/api/signups', json=new_signup)
 

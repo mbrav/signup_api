@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from app import api, db, middleware, models
 from app.config import settings
-from app.services import start_scheduler
+from app.services import start_calendar, start_scheduler
 from app.utils import create_superuser
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,8 +16,8 @@ with open(f'{REPO_DIR}/README.md') as f:
 logger = logging.getLogger()
 
 app = FastAPI(
-    title='API service for tasks',
-    # description=description,
+    title='Fast API service for signups and Telegram integration',
+    description=description,
     contact={
         'name': 'mbrav',
         'url': 'https://github.com/mbrav',
@@ -78,6 +78,7 @@ async def startup_database():
 @app.on_event('startup')
 async def startup_scheduler():
     await start_scheduler()
+    await start_calendar()
 
 
 @app.on_event('shutdown')

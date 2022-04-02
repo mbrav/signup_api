@@ -35,7 +35,7 @@ class AuthService:
     @staticmethod
     async def get_user(
         username: str,
-        db_session: Session = Depends(db.get_database)
+        db_session: Session = Depends(db.get_database),
     ) -> models.User:
         """Get user from database"""
 
