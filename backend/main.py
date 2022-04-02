@@ -8,17 +8,16 @@ from app.config import settings
 from app.services import start_scheduler
 from app.utils import create_superuser
 
-# from starlette.middleware.cors import CORSMiddleware
-
-
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(FILE_DIR)
 with open(f'{REPO_DIR}/README.md') as f:
     description = f.read()
 
+logger = logging.getLogger()
+
 app = FastAPI(
-    title='API service for signups and Telegram integration',
-    description=description,
+    title='API service for tasks',
+    # description=description,
     contact={
         'name': 'mbrav',
         'url': 'https://github.com/mbrav',
@@ -35,31 +34,10 @@ app = FastAPI(
 
 
 app.include_router(api.api_router, prefix=settings.API_V1_STR)
-# app.include_router(tg_router, prefix=settings.WEBHOOK_PATH,
-#                    tags=['Telegram Bot'])
 
 app.add_middleware(middleware.ProcessTimeMiddleware)
-# app.add_middleware(middleware.ClientLookupMiddleware)
-
-# if settings.BACKEND_CORS_ORIGINS:
-#     app.add_middleware(
-#         CORSMiddleware,
-#         allow_origins=settings.BACKEND_CORS_ORIGINS,
-#         allow_credentials=True,
-#         allow_methods=['*'],
-#         allow_headers=['*'],
-#     )
-
-
-app.include_router(api.api_router, prefix=settings.API_V1_STR)
-
-app.add_middleware(middleware.ProcessTimeMiddleware)
-
 
 if settings.LOGGING:
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-
     logger_level = logging.INFO
     if settings.DEBUG:
         logger_level = logging.DEBUG
@@ -87,8 +65,8 @@ if settings.LOGGING:
 async def startup_database():
     logger.info('FastAPI starting up...')
     async with db.engine.begin() as conn:
-        if settings.TESTING:
-            await conn.run_sync(models.Base.metadata.drop_all)
+        # if settings.TESTING:
+        #     await conn.run_sync(models.Base.metadata.drop_all)
         await conn.run_sync(models.Base.metadata.create_all)
     await db.engine.dispose()
     if settings.FIRST_SUPERUSER:
@@ -97,9 +75,9 @@ async def startup_database():
             password=settings.FIRST_SUPERUSER_PASSWORD)
 
 
-# @app.on_event('startup')
-# async def startup_scheduler():
-#     await start_scheduler()
+@app.on_event('startup')
+async def startup_scheduler():
+    await start_scheduler()
 
 
 @app.on_event('shutdown')
