@@ -1,15 +1,9 @@
 from app import db, models, schemas
-from app.config import settings
-from app.services import AuthService
+from app.services import auth_service
 from fastapi import Depends, HTTPException, Query, status
 from jose import JWTError, jwt
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-auth_service = AuthService(
-    secret=settings.SECRET_KEY,
-    algorithm=settings.CRYPT_ALGORITHM,
-    expire=settings.TOKEN_EXPIRE_MINUTES)
 
 SortByQuery = Query(
     None,

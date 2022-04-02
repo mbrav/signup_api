@@ -2,20 +2,14 @@ import logging
 import os
 
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
 
 from app import api, db, middleware, models
 from app.config import settings
-# from app.services import GoogleCal, tg_router
+from app.services import start_scheduler
 from app.utils import create_superuser
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# from starlette.middleware.cors import CORSMiddleware
 
-# google_cal = GoogleCal(
-#     api_key=settings.CAL_API_KEY,
-#     cal_id=settings.CAL_ID,
-# )
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(FILE_DIR)
@@ -47,33 +41,65 @@ app.include_router(api.api_router, prefix=settings.API_V1_STR)
 app.add_middleware(middleware.ProcessTimeMiddleware)
 # app.add_middleware(middleware.ClientLookupMiddleware)
 
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.BACKEND_CORS_ORIGINS,
-        allow_credentials=True,
-        allow_methods=['*'],
-        allow_headers=['*'],
-    )
+# if settings.BACKEND_CORS_ORIGINS:
+#     app.add_middleware(
+#         CORSMiddleware,
+#         allow_origins=settings.BACKEND_CORS_ORIGINS,
+#         allow_credentials=True,
+#         allow_methods=['*'],
+#         allow_headers=['*'],
+#     )
 
 
-async def start_db():
+app.include_router(api.api_router, prefix=settings.API_V1_STR)
+
+app.add_middleware(middleware.ProcessTimeMiddleware)
+
+
+if settings.LOGGING:
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    logger_level = logging.INFO
+    if settings.DEBUG:
+        logger_level = logging.DEBUG
+
+    os.makedirs(os.path.dirname(settings.LOG_PATH), exist_ok=True)
+
+    formatter = logging.Formatter(
+        '%(levelname)s:%(name)s %(asctime)s: %(message)s')
+    handler = logging.handlers.RotatingFileHandler(
+        settings.LOG_PATH,
+        delay=0,
+        maxBytes=1024*1024*2,
+        backupCount=5)
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger()
+    logger.setLevel(logger_level)
+    logger.addHandler(handler)
+
+    logging.getLogger('sqlalchemy.engine').setLevel(logger_level)
+    logging.getLogger('sqlalchemy.pool').setLevel(logger_level)
+
+
+@app.on_event('startup')
+async def startup_database():
+    logger.info('FastAPI starting up...')
     async with db.engine.begin() as conn:
         if settings.TESTING:
             await conn.run_sync(models.Base.metadata.drop_all)
         await conn.run_sync(models.Base.metadata.create_all)
     await db.engine.dispose()
-
-
-@app.on_event('startup')
-async def startup_event():
-    logger.info('FastAPI starting up...')
-    # google_cal.get()
-    await start_db()
     if settings.FIRST_SUPERUSER:
         await create_superuser(
             username=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD)
+
+
+# @app.on_event('startup')
+# async def startup_scheduler():
+#     await start_scheduler()
 
 
 @app.on_event('shutdown')

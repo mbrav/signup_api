@@ -1,10 +1,12 @@
+from datetime import datetime
+
 from fastapi import HTTPException, status
 from fastapi_pagination.ext.async_sqlalchemy import paginate
 from sqlalchemy import Column, DateTime, Integer, inspect, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.sql import func, text
+from sqlalchemy.sql import text
 
 Base = declarative_base()
 
@@ -26,12 +28,16 @@ class BaseModel(Base):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    created_at = Column(DateTime(timezone=True), default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, nullable=True)
 
     @declared_attr
     def __tablename__(self) -> str:
         return to_snake_case(self.__name__) + 's'
+
+    async def _update_modified(self):
+        """Update time of object when modified"""
+        self.updated_at = datetime.now()
 
     async def save(self, db_session: AsyncSession):
         """Save object
@@ -48,13 +54,9 @@ class BaseModel(Base):
             await db_session.refresh(self)
             return self
         except IntegrityError as ex:
-            if ex.orig:
-                ex = ex.orig
-                if ex.args:
-                    ex = ex.args
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=repr(ex))
+                detail=repr(ex.orig))
         except SQLAlchemyError as ex:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -111,16 +113,44 @@ class BaseModel(Base):
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=repr(ex))
 
+    async def update(self, db_session: AsyncSession, **kwargs):
+        """Update model object with provided attributes"""
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+        try:
+            await self._update_modified()
+            db_session.add(self)
+            await db_session.commit()
+            return self
+        except SQLAlchemyError as ex:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=repr(ex))
+
+    async def delete(self, db_session: AsyncSession):
+        """Delete model object from database"""
+
+        try:
+            await db_session.delete(self)
+            await db_session.commit()
+            return True
+        except SQLAlchemyError as ex:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=repr(ex))
+
     @classmethod
-    async def paginate(
+    async def _get_objects(
         self,
         db_session: AsyncSession,
         db_query: select = None,
         sort_by: str = None,
         desc: bool = True,
+        paginated: bool = False,
         **kwargs
-    ) -> paginate:
-        """Get paginated list of objects
+    ):
+        """Get list of objects of paginated
 
         Args:
             db_session (AsyncSession): Current db session
@@ -133,13 +163,15 @@ class BaseModel(Base):
 
         Returns:
             paginate: fastapi_pagination result
+            or
+            Database models or None
         """
 
         filter_by = {k: v for k, v in kwargs.items() if v is not None}
 
         if not sort_by:
             sort_by = inspect(self).primary_key[0].name
-        if not db_query:
+        if db_query is None:
             column = self.__table__.columns.get(sort_by).name
             sort = 'desc'
             if not desc:
@@ -151,30 +183,20 @@ class BaseModel(Base):
                 db_query = select(self).order_by(text(f'{column} {sort}'))
 
         try:
-            return await paginate(db_session, db_query)
+            if paginated:
+                return await paginate(db_session, db_query)
+            return await db_session.execute(db_query)
         except SQLAlchemyError as ex:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=repr(ex))
 
-    async def update(self, db_session: AsyncSession, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-        try:
-            db_session.add(self)
-            await db_session.commit()
-            return self
-        except SQLAlchemyError as ex:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=repr(ex))
+    @classmethod
+    async def get_list(self, db_session: AsyncSession, **kwargs) -> paginate:
+        """Get list of objects"""
+        return await self._get_objects(db_session, paginated=False, **kwargs)
 
-    async def delete(self, db_session: AsyncSession):
-        try:
-            await db_session.delete(self)
-            await db_session.commit()
-            return True
-        except SQLAlchemyError as ex:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=repr(ex))
+    @classmethod
+    async def paginate(self, db_session: AsyncSession, **kwargs) -> paginate:
+        """Get paginated list of objects"""
+        return await self._get_objects(db_session, paginated=True, **kwargs)

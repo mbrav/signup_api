@@ -2,7 +2,7 @@ import random
 import string
 
 from app import db, models, schemas
-from app.api import auth_service
+from app.services import auth_service
 
 
 async def create_superuser(
@@ -27,6 +27,7 @@ async def create_superuser(
             is_admin=True)
         new_user = models.User(**user_in.dict())
         await new_user.save(db_session)
+    await db_session.close()
 
 
 def random_lower_string(num: int = 20) -> str:

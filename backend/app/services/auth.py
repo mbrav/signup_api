@@ -86,3 +86,9 @@ class AuthService:
             self.SECRET_KEY,
             algorithm=self.CRYPT_ALGORITHM)
         return encoded_jwt
+
+
+auth_service = AuthService(
+    secret=settings.SECRET_KEY,
+    algorithm=settings.CRYPT_ALGORITHM,
+    expire=settings.TOKEN_EXPIRE_MINUTES)

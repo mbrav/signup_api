@@ -16,6 +16,7 @@ class User(BaseModel):
     is_admin = Column(Boolean(), default=False)
 
     # signups = relationship('User', back_populates='owner')
+    tasks = relationship('Task', back_populates='user')
 
     def __init__(self,
                  username: str,

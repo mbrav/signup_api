@@ -1,4 +1,3 @@
-import logging
 from typing import List, Optional
 
 from pydantic import AnyHttpUrl, BaseSettings, Field, PostgresDsn
@@ -18,6 +17,7 @@ class SettingsBase(BaseSettings):
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)
     LOGGING: bool = Field(env='LOGGING', default=False)
+    LOG_PATH: str = Field(env='LOG_PATH', default='logs/app.log')
 
     SECRET_KEY: str = Field(env='SECRET_KEY', default='pl3seCh@nGeM3!')
     API_V1_STR: str = Field(env='API_V1_STR', default='/api')
@@ -35,24 +35,6 @@ class DBSettings(SettingsBase):
         env='FIRST_SUPERUSER', default='admin')
     FIRST_SUPERUSER_PASSWORD: str = Field(
         env='FIRST_SUPERUSER_PASSWORD', default='password')
-
-
-class MySQLMixin(DBSettings):
-    """"MySQL Settings Mixin"""
-
-    MYSQL_USER: Optional[str] = Field(env='MYSQL_USER')
-    MYSQL_PASSWORD: Optional[str] = Field(env='MYSQL_PASSWORD')
-    MYSQL_HOST: Optional[str] = Field(env='MYSQL_HOST')
-    MYSQL_PORT: Optional[int] = Field(env='MYSQL_PORT')
-    MYSQL_NAME: Optional[str] = Field(env='MYSQL_NAME')
-
-    @property
-    def DATABASE_URL(self) -> str:
-        url = f'mysql+pymysql://' \
-            f'{self.MYSQL_USER}:' \
-            f'{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}/' \
-            f'{self.MYSQL_NAME}?charset=utf8mb4'
-        return url
 
 
 class PostgresMixin(DBSettings):
@@ -114,24 +96,3 @@ class Settings(
 
 
 settings = Settings()
-
-if settings.LOGGING:
-    logger_level = logging.INFO
-    if settings.DEBUG:
-        logger_level = logging.DEBUG
-
-    formatter = logging.Formatter(
-        '%(levelname)s:%(name)s %(asctime)s: %(message)s')
-    handler = logging.handlers.RotatingFileHandler(
-        'logs/app.log',
-        delay=0,
-        maxBytes=1024*1024*2,
-        backupCount=5)
-    handler.setFormatter(formatter)
-
-    logger = logging.getLogger()
-    logger.setLevel(logger_level)
-    logger.addHandler(handler)
-
-    logging.getLogger('sqlalchemy.engine').setLevel(logger_level)
-    logging.getLogger('sqlalchemy.pool').setLevel(logger_level)
