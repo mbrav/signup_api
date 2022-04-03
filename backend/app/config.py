@@ -1,3 +1,4 @@
+from datetime import timezone
 from typing import List, Optional
 
 from pydantic import AnyHttpUrl, BaseSettings, Field, PostgresDsn
@@ -12,7 +13,7 @@ class SettingsBase(BaseSettings):
 
     """
 
-    VERSION: str = Field('0.1.4')
+    VERSION: str = Field('0.1.5')
 
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)
@@ -21,6 +22,7 @@ class SettingsBase(BaseSettings):
 
     SECRET_KEY: str = Field(env='SECRET_KEY', default='pl3seCh@nGeM3!')
     API_V1_STR: str = Field(env='API_V1_STR', default='/api')
+    TIMEZONE: timezone = Field(timezone.utc)
 
     class Config:
         env_file = '.env'
@@ -73,6 +75,7 @@ class ExternalServiceMixin(SettingsBase):
     """External Service Settings Mixin for bots, APIs etc."""
 
     TELEGRAM_BOT_API_KEY: Optional[str] = Field(env='TELEGRAM_BOT_API_KEY')
+    TG_ADMIN: Optional[int] = Field(env='TG_ADMIN', default=12345678)
 
     WEBHOOK_HOST: Optional[str] = Field(env='WEBHOOK_HOST')
     WEBHOOK_PATH: Optional[str] = Field(env='WEBHOOK_PATH', default='/bot')

@@ -3,9 +3,8 @@ import os
 
 from fastapi import FastAPI
 
-from app import api, db, middleware, models
+from app import api, db, middleware, models, services
 from app.config import settings
-from app.services import start_calendar, start_scheduler
 from app.utils import create_superuser
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +33,9 @@ app = FastAPI(
 
 
 app.include_router(api.api_router, prefix=settings.API_V1_STR)
+app.include_router(services.tg_router,
+                   prefix=settings.WEBHOOK_PATH,
+                   tags=['Telegram Bot'])
 
 app.add_middleware(middleware.ProcessTimeMiddleware)
 
@@ -76,9 +78,9 @@ async def startup_database():
 
 
 @app.on_event('startup')
-async def startup_scheduler():
-    await start_scheduler()
-    await start_calendar()
+async def start_serices():
+    await services.start_scheduler()
+    await services.start_calendar()
 
 
 @app.on_event('shutdown')

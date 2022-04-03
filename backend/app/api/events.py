@@ -76,7 +76,6 @@ async def event_patch(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.EventOut])
 async def events_list(
-    user: models.User = Depends(get_active_user),
     db_session: AsyncSession = Depends(db.get_database),
     sort_by: Optional[str] = SortByQuery,
     desc: Optional[bool] = SortByDescQuery,

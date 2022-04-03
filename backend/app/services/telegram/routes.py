@@ -32,8 +32,7 @@ async def on_startup() -> None:
     current_url = (await dp.bot.get_webhook_info())['url']
     if current_url != settings.WEBHOOK_PATH:
         await dp.bot.set_webhook(url=settings.WEBHOOK_URL)
-    if not settings.DEBUG:
-        await dp.bot.send_message(settings.ADMIN, 'Signup Bot.')
+    await dp.bot.send_message(settings.TG_ADMIN, 'Signup Bot.')
 
 
 @tg_router.on_event('shutdown')

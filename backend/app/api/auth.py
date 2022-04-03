@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.post(path='/token', response_model=schemas.Token)
-async def access_token_login(
+async def get_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db_session: AsyncSession = Depends(db.get_database)
 ) -> schemas.Token:
@@ -25,6 +25,11 @@ async def access_token_login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Incorrect username or password',
+            headers={'WWW-Authenticate': 'Bearer'})
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User is not active',
             headers={'WWW-Authenticate': 'Bearer'})
     access_token_expires = timedelta(minutes=auth_service.TOKEN_EXPIRE_MINUTES)
     data = {'sub': user.username}
@@ -42,13 +47,14 @@ async def access_token_login(
     path='/register',
     response_model=schemas.UserBase,
     status_code=status.HTTP_201_CREATED)
-async def user_register(
+async def register_user(
     schema: schemas.UserLogin,
     db_session: AsyncSession = Depends(db.get_database)
 ) -> models.User:
     """Register new user"""
 
-    user = await models.User.get(db_session, username=schema.username, raise_404=False)
+    user = await models.User.get(
+        db_session, username=schema.username, raise_404=False)
     if user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -61,3 +67,29 @@ async def user_register(
         password=hashed_password)
 
     return await new_object.save(db_session)
+
+
+# @router.post(
+#     path='/password',
+#     response_model=schemas.UserBase,
+#     status_code=status.HTTP_200_OK)
+# async def change_user_password(
+#     schema: schemas.UserLogin,
+#     db_session: AsyncSession = Depends(db.get_database)
+# ) -> models.User:
+#     """Change user password"""
+
+#     user = await models.User.get(
+#         db_session, username=schema.username, raise_404=False)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail='User does not exist',
+#             headers={'WWW-Authenticate': 'Bearer'})
+
+#     hashed_password = auth_service.hash_password(schema.password)
+#     update_object = models.User(
+#         username=schema.username,
+#         password=hashed_password)
+
+#     return await update_object.update(db_session, **update_object.__dict__)

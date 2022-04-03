@@ -41,31 +41,33 @@ class Task(BaseModel):
         self.completed_at = completed_at
         self.status = status
         self.result = result
-        self.planned_for = datetime.now() + timedelta(seconds=delay_seconds)
+        self.planned_for = datetime.utcnow() + timedelta(seconds=delay_seconds)
 
     async def _update_modified(self):
         """Update time of object when modified"""
-        self.updated_at = datetime.now()
+        self.updated_at = datetime.utcnow()
         processing = self.status in (
-            TaskStatus.processing, TaskStatus.queued)
+            TaskStatus.processing, TaskStatus.queued, TaskStatus.aborted)
         if not self.result and not processing:
-            if self.planned_for < datetime.now():
+            if self.planned_for < datetime.utcnow():
                 self.status = TaskStatus.expired
                 self.completed_at = None
             elif self.status != TaskStatus.rescheduled:
                 self.status = TaskStatus.created
 
-    async def update_planned_for(self, seconds: int):
+    async def update_planned_for(self, db_session: AsyncSession, seconds: int):
         """Update planned for time when delay is modified"""
         self.status = TaskStatus.rescheduled
         self.delay_seconds = seconds
         self.planned_for = self.created_at + timedelta(seconds=seconds)
         await self._update_modified()
+        await self.update(db_session, **self.__dict__)
 
-    async def abort(self):
+    async def abort(self, db_session: AsyncSession):
         """Abort task"""
         self.status = TaskStatus.aborted
         await self._update_modified()
+        await self.update(db_session, **self.__dict__)
 
     async def update_process_status(self, db_session: AsyncSession):
         """Update model with processing status"""
@@ -75,7 +77,7 @@ class Task(BaseModel):
 
     async def add_result(self, db_session: AsyncSession, result: str):
         """Update model with result"""
-        self.completed_at = datetime.now()
+        self.completed_at = datetime.utcnow()
         self.result = result
         self.status = TaskStatus.completed
         await self._update_modified()
@@ -87,12 +89,11 @@ class Task(BaseModel):
         db_query = select(self).where(and_(
             or_(self.status == TaskStatus.created,
                 self.status == TaskStatus.rescheduled),
-            self.planned_for < datetime.now()
+            self.planned_for < datetime.utcnow()
         )).order_by(
             self.created_at.asc())
 
-        tasks = await self.get_list(db_session, db_query=db_query)
-        return tasks
+        return await self.get_list(db_session, db_query=db_query)
 
     @classmethod
     async def get_expired_tasks(self, db_session: AsyncSession):
@@ -101,5 +102,4 @@ class Task(BaseModel):
             self.status == TaskStatus.expired,
         )).order_by(
             self.created_at.asc())
-        tasks = await self.get_list(db_session, db_query=db_query)
-        return tasks
+        return await self.get_list(db_session, db_query=db_query)

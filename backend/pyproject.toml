@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "signup_api"
-version = "0.1.4"
+version = "0.1.5"
 description = "An 100% asynchronous Fast API service for signups and Telegram integration"
 authors = ["mbrav <mbrav@protonmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 fastapi = "*"
-fastapi-pagination = {extras = ["sqlalchemy"], version = "*"}
+fastapi-pagination = "*"
 pydantic = {extras = ["email", "dotenv"], version = "*"}
 uvicorn = {extras = ["standard"], version = "*"}
 SQLAlchemy = "*"

@@ -13,6 +13,7 @@ As of now, this project is mainly an **architecture design** experimental ground
 -   Integration with Telegram library [aiogram](https://github.com/aiogram/aiogram) using its upcoming [v3.0 version](https://docs.aiogram.dev/en/dev-3.x/) with webhooks as an integration method with FastAPI;
 -   A token authorization system using the [argon2 password hashing algorithm](https://github.com/P-H-C/phc-winner-argon2), the password-hashing function that won the [Password Hashing Competition (PHC)](https://www.password-hashing.net/);
 -   Asynchronous task scheduling using [apscheduler](https://github.com/agronholm/apscheduler);
+-   Designed to run efficently as possbile on a device such as the Raspberry Pi;
 -   Asynchronous pytests using [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) and [httpx](https://www.python-httpx.org/) libraries instead of the synchronous requests library;
 -   Vue.js 3.2 basic frontend with potential future experimentation with [vite](https://vitejs.dev/) and [vuetify](https://github.com/vuetifyjs/vuetify) framework.
 

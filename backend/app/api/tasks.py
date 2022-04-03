@@ -70,7 +70,7 @@ async def task_abort(
     """Abort task with POST request"""
 
     get_object = await models.Task.get(db_session, id=id)
-    await get_object.abort()
+    await get_object.abort(db_session)
     updated = schemas.TaskUpdate(**get_object.__dict__)
     return await get_object.update(db_session, **updated.__dict__)
 
@@ -118,9 +118,8 @@ async def task_patch(
 
     await check_method(schema.name, schema.kwargs)
     get_object = await models.Task.get(db_session, id=id)
-    await get_object.update_planned_for(schema.delay_seconds)
-    updated = schemas.TaskUpdate(**get_object.__dict__)
-    return await get_object.update(db_session, **updated.__dict__)
+    await get_object.update_planned_for(db_session, schema.delay_seconds)
+    return get_object
 
 
 @router.get(

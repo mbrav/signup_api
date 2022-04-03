@@ -28,7 +28,7 @@ class BaseModel(Base):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    created_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, default=datetime.utcnow())
     updated_at = Column(DateTime, nullable=True)
 
     @declared_attr
@@ -37,7 +37,7 @@ class BaseModel(Base):
 
     async def _update_modified(self):
         """Update time of object when modified"""
-        self.updated_at = datetime.now()
+        self.updated_at = datetime.utcnow()
 
     async def save(self, db_session: AsyncSession):
         """Save object
@@ -200,3 +200,8 @@ class BaseModel(Base):
     async def paginate(self, db_session: AsyncSession, **kwargs) -> paginate:
         """Get paginated list of objects"""
         return await self._get_objects(db_session, paginated=True, **kwargs)
+
+    @classmethod
+    async def get_distinct(self, db_session: AsyncSession, *args) -> list:
+        """Get list of specific model fields as rows"""
+        return await db_session.execute(select(*args))

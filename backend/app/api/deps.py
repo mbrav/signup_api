@@ -6,18 +6,18 @@ from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 SortByQuery = Query(
-    None,
+    default=None,
     title='Sort by column',
     description='Name of column to sort by',
 )
 
 SortByDescQuery = Query(
-    True,
+    default=True,
     title='Sort descending',
 )
 
 FilterQuery = Query(
-    None,
+    default=None,
     title='Filter by column'
 )
 
