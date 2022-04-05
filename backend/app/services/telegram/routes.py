@@ -1,41 +1,40 @@
+import logging
 from typing import Any, Dict
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, types
 from app.config import settings
 from fastapi import APIRouter, BackgroundTasks, Body, Response, status
 
 from .handlers import dp
-from .middlewares import ThrottlingMiddleware
+from .loader import bot
 
-tg_router = APIRouter()
+router = APIRouter()
+logger = logging.getLogger()
 
 
-async def feed_update(update: dict):
+async def feed_update(update: Dict[str, Any]) -> None:
     telegram_update = types.Update(**update)
-    Bot.set_current(dp.bot)
-    Dispatcher.set_current(dp)
-    await dp.process_update(telegram_update)
+    # await dp.feed_update(bot, telegram_update)
+    await dp.feed_webhook_update(bot, telegram_update)
 
 
-@tg_router.post(path='')
+@router.post(path='')
 async def telegram_post(background_tasks: BackgroundTasks, update: Dict[str, Any] = Body(...)) -> Response:
     background_tasks.add_task(feed_update, update)
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
-@tg_router.on_event('startup')
+@router.on_event('startup')
 async def on_startup() -> None:
-    Bot.set_current(dp.bot)
-    Dispatcher.set_current(dp)
-    dp.middleware.setup(ThrottlingMiddleware())
-    current_url = (await dp.bot.get_webhook_info())['url']
-    if current_url != settings.WEBHOOK_PATH:
-        await dp.bot.set_webhook(url=settings.WEBHOOK_URL)
-    await dp.bot.send_message(settings.TELEGRAM_ADMIN, 'Signup Bot.')
+    logging.info('Telegram bot startup')
+    Bot.set_current(bot)
+    current_webhook = await bot.get_webhook_info()
+    if current_webhook.url != settings.WEBHOOK_PATH:
+        await bot.set_webhook(url=settings.WEBHOOK_URL)
+    await bot.send_message(settings.TELEGRAM_ADMIN, 'Signup Bot.')
 
 
-@tg_router.on_event('shutdown')
+@router.on_event('shutdown')
 async def on_shutdown() -> None:
-    await dp.storage.close()
-    await dp.storage.wait_closed()
-    await dp.bot.session.close()
+    logging.info('Telegram bot shutdown')
+    await bot.delete_webhook()

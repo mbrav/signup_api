@@ -1,16 +1,9 @@
-from asyncio import get_event_loop
-
-from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram import Bot, Dispatcher
 from app.config import settings
 
 bot = Bot(
-    settings.TELEGRAM_TOKEN,
-    parse_mode=types.ParseMode.HTML
+    token=settings.TELEGRAM_TOKEN.get_secret_value(),
+    parse_mode='HTML'
 )
 
-dp = Dispatcher(
-    bot=bot,
-    storage=MemoryStorage(),
-    loop=get_event_loop()
-)
+dp = Dispatcher()

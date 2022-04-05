@@ -5,15 +5,15 @@ from fastapi import APIRouter, Depends, status
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .deps import (FilterQuery, SortByDescQuery, SortByQuery,
-                   get_active_superuser, get_active_user)
+from .deps import (FilterQuery, PermissionAdmin, PermissionUser,
+                   SortByDescQuery, SortByQuery)
 
 router = APIRouter()
 
 
 @router.get(path='/me', response_model=schemas.User)
 async def user_info(
-    user: models.User = Depends(get_active_user)
+    user: models.User = Depends(PermissionUser)
 ):
     """Get user info"""
 
@@ -26,7 +26,7 @@ async def user_info(
     response_model=schemas.User)
 async def user_get(
     username: str,
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.User:
     """Retrieve user with GET request"""
@@ -40,7 +40,7 @@ async def user_get(
     status_code=status.HTTP_204_NO_CONTENT)
 async def user_delete(
     username: str,
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.User:
     """Retrieve user with DELETE request"""
@@ -56,7 +56,7 @@ async def user_delete(
 async def user_patch(
     username: str,
     schema: schemas.UserUpdate,
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.User:
     """Modify user with PATCH request"""
@@ -70,7 +70,7 @@ async def user_patch(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.User])
 async def users_list(
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
     sort_by: Optional[str] = SortByQuery,
     desc: Optional[bool] = SortByDescQuery,

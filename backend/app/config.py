@@ -1,7 +1,7 @@
 from datetime import timezone
 from typing import List, Optional
 
-from pydantic import AnyHttpUrl, BaseSettings, Field, PostgresDsn
+from pydantic import AnyHttpUrl, BaseSettings, Field, PostgresDsn, SecretStr
 
 
 class SettingsBase(BaseSettings):
@@ -13,14 +13,14 @@ class SettingsBase(BaseSettings):
 
     """
 
-    VERSION: str = Field('0.1.5')
+    VERSION: str = Field('0.1.6')
 
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)
     LOGGING: bool = Field(env='LOGGING', default=False)
     LOG_PATH: str = Field(env='LOG_PATH', default='logs/app.log')
 
-    SECRET_KEY: str = Field(env='SECRET_KEY', default='pl3seCh@nGeM3!')
+    SECRET_KEY: SecretStr = Field(env='SECRET_KEY', default='pl3seCh@nGeM3!')
     API_V1_STR: str = Field(env='API_V1_STR', default='/api')
     TIMEZONE: timezone = Field(timezone.utc)
 
@@ -35,27 +35,27 @@ class DBSettings(SettingsBase):
 
     FIRST_SUPERUSER: str = Field(
         env='FIRST_SUPERUSER', default='admin')
-    FIRST_SUPERUSER_PASSWORD: str = Field(
+    FIRST_SUPERUSER_PASSWORD: SecretStr = Field(
         env='FIRST_SUPERUSER_PASSWORD', default='password')
 
 
 class PostgresMixin(DBSettings):
     """"Postgres Settings Mixin"""
 
-    POSTGRES_USER: Optional[str] = Field(
+    POSTGRES_USER: str = Field(
         env='POSTGRES_USER', default='postgres')
-    POSTGRES_PASSWORD: Optional[str] = Field(
+    POSTGRES_PASSWORD: SecretStr = Field(
         env='POSTGRES_PASSWORD', default='postgres')
-    POSTGRES_SERVER: Optional[str] = Field(
+    POSTGRES_SERVER: str = Field(
         env='POSTGRES_SERVER', default='db')
-    POSTGRES_PORT: Optional[int] = Field(env='POSTGRES_PORT', default=5432)
-    POSTGRES_DB: Optional[str] = Field(env='POSTGRES_DB', default='postgres')
+    POSTGRES_PORT: int = Field(env='POSTGRES_PORT', default=5432)
+    POSTGRES_DB: str = Field(env='POSTGRES_DB', default='postgres')
 
     @property
     def DATABASE_URL(self) -> PostgresDsn:
         url = f'postgresql+asyncpg://' \
             f'{self.POSTGRES_USER}:' \
-            f'{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:' \
+            f'{self.POSTGRES_PASSWORD.get_secret_value()}@{self.POSTGRES_SERVER}:' \
             f'{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
         return url
 
@@ -74,15 +74,15 @@ class AuthServiceMixin(SettingsBase):
 class ExternalServiceMixin(SettingsBase):
     """External Service Settings Mixin for bots, APIs etc."""
 
-    TELEGRAM_TOKEN: Optional[str] = Field(env='TELEGRAM_TOKEN')
+    TELEGRAM_TOKEN: Optional[SecretStr] = Field(env='TELEGRAM_TOKEN')
     TELEGRAM_ADMIN: Optional[int] = Field(
         env='TELEGRAM_ADMIN', default=12345678)
 
     WEBHOOK_HOST: Optional[str] = Field(env='WEBHOOK_HOST')
     WEBHOOK_PATH: Optional[str] = Field(env='WEBHOOK_PATH', default='/bot')
 
-    CAL_API_KEY: Optional[str] = Field(env='CAL_API_KEY')
-    CAL_ID: Optional[str] = Field(env='CAL_ID')
+    CAL_API_KEY: Optional[SecretStr] = Field(env='CAL_API_KEY')
+    CAL_ID: Optional[SecretStr] = Field(env='CAL_ID')
 
     @property
     def WEBHOOK_URL(self) -> str:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "signup_api"
-version = "0.1.5"
+version = "0.1.6"
 description = "An 100% asynchronous Fast API service for signups and Telegram integration"
 authors = ["mbrav <mbrav@protonmail.com>"]
 
@@ -18,7 +18,7 @@ python-multipart = "*"
 httpx = {extras = ["http2"], version = "*"}
 APScheduler = "*"
 transliterate = "*"
-aiogram = "*"
+aiogram = "3.0.0b2"
 
 
 [tool.poetry.dev-dependencies]

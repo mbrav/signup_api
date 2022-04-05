@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .deps import (FilterQuery, SortByDescQuery, SortByQuery,
-                   get_active_superuser, get_active_user)
+from .deps import (FilterQuery, PermissionAdmin, PermissionUser,
+                   SortByDescQuery, SortByQuery)
 
 router = APIRouter()
 
@@ -34,9 +34,7 @@ async def check_method(name: str, kwargs: dict):
     path='/available',
     status_code=status.HTTP_200_OK,
     response_model=Dict[str, TaskDetail])
-async def available_tasks_list(
-    db_session: AsyncSession = Depends(db.get_database),
-):
+async def available_tasks_list():
     """List executable tasks with GET request"""
 
     return tasks_info
@@ -48,7 +46,7 @@ async def available_tasks_list(
     status_code=status.HTTP_201_CREATED)
 async def task_post(
     schema: schemas.TaskIn,
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Task:
     """Create new task with POST request"""
@@ -64,7 +62,7 @@ async def task_post(
     status_code=status.HTTP_201_CREATED)
 async def task_abort(
     id: int,
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Task:
     """Abort task with POST request"""
@@ -81,7 +79,7 @@ async def task_abort(
     response_model=schemas.TaskOut)
 async def task_get(
     id: int,
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Task:
     """Retrieve task with GET request"""
@@ -95,7 +93,7 @@ async def task_get(
     status_code=status.HTTP_204_NO_CONTENT)
 async def task_delete(
     id: int,
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Task:
     """Retrieve task with GET request"""
@@ -111,7 +109,7 @@ async def task_delete(
 async def task_patch(
     id: int,
     schema: schemas.TaskIn,
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Task:
     """Modify task with PATCH request"""
@@ -127,7 +125,7 @@ async def task_patch(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.TaskOut])
 async def tasks_list(
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
     sort_by: Optional[str] = SortByQuery,
     desc: Optional[bool] = SortByDescQuery,
@@ -152,7 +150,7 @@ async def tasks_list(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.TaskOut])
 async def tasks_list_by_user(
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
     sort_by: Optional[str] = SortByQuery,
     desc: Optional[bool] = SortByDescQuery,

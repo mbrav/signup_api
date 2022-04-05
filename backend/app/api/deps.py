@@ -35,7 +35,7 @@ async def get_auth_user(
 
     try:
         payload = jwt.decode(
-            token, auth_service.SECRET_KEY,
+            token, auth_service.SECRET_KEY.get_secret_value(),
             algorithms=[auth_service.CRYPT_ALGORITHM])
         username: str = payload.get('sub')
         if username is None:
@@ -53,7 +53,7 @@ async def get_auth_user(
     return user
 
 
-async def get_active_user(
+async def PermissionUser(
     current_user: models.User = Depends(get_auth_user)
 ) -> models.User:
     """Check if user is active"""
@@ -65,7 +65,7 @@ async def get_active_user(
     return current_user
 
 
-async def get_active_superuser(
+async def PermissionAdmin(
     current_user: models.User = Depends(get_auth_user),
 ) -> models.User:
     """Check for supperuser permissions"""

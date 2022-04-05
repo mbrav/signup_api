@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, status
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .deps import (FilterQuery, SortByDescQuery, SortByQuery,
-                   get_active_superuser, get_active_user)
+from .deps import (FilterQuery, PermissionAdmin, PermissionUser,
+                   SortByDescQuery, SortByQuery)
 
 router = APIRouter()
 
@@ -17,7 +17,7 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED)
 async def signup_post(
     schema: schemas.SignupIn,
-    user: Optional[models.User] = Depends(get_active_user),
+    user: Optional[models.User] = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database)
 ) -> models.Signup:
     """Create new signup with POST request"""
@@ -33,7 +33,7 @@ async def signup_post(
     response_model=schemas.SignupOut)
 async def signup_get(
     id: int,
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Signup:
     """Retrieve signup with GET request"""
@@ -47,7 +47,7 @@ async def signup_get(
     status_code=status.HTTP_204_NO_CONTENT)
 async def signup_delete(
     id: int,
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Signup:
     """Retrieve signup with GET request"""
@@ -63,7 +63,7 @@ async def signup_delete(
 async def signup_patch(
     id: int,
     schema: schemas.SignupIn,
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Signup:
     """Modify signup with PATCH request"""
@@ -77,7 +77,7 @@ async def signup_patch(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.SignupOut])
 async def signups_list(
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
     sort_by: Optional[str] = SortByQuery,
     desc: Optional[bool] = SortByDescQuery,
@@ -108,7 +108,7 @@ async def signups_list(
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[schemas.SignupOut])
 async def signups_list_by_user(
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
     sort_by: Optional[str] = SortByQuery,
     desc: Optional[bool] = SortByDescQuery,

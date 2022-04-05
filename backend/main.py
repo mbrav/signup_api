@@ -74,7 +74,7 @@ async def startup_database():
     if settings.FIRST_SUPERUSER:
         await create_superuser(
             username=settings.FIRST_SUPERUSER,
-            password=settings.FIRST_SUPERUSER_PASSWORD)
+            password=settings.FIRST_SUPERUSER_PASSWORD.get_secret_value())
 
 
 @app.on_event('startup')

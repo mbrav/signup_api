@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, status
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .deps import (FilterQuery, SortByDescQuery, SortByQuery,
-                   get_active_superuser, get_active_user)
+from .deps import (FilterQuery, PermissionAdmin, PermissionUser,
+                   SortByDescQuery, SortByQuery)
 
 router = APIRouter()
 
@@ -17,7 +17,7 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED)
 async def event_post(
     schema: schemas.EventIn,
-    user: Optional[models.User] = Depends(get_active_user),
+    user: Optional[models.User] = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database)
 ) -> models.Event:
     """Create new event with POST request"""
@@ -32,7 +32,7 @@ async def event_post(
     response_model=schemas.EventOut)
 async def event_get(
     id: int,
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Event:
     """Retrieve event with GET request"""
@@ -46,7 +46,7 @@ async def event_get(
     status_code=status.HTTP_204_NO_CONTENT)
 async def event_delete(
     id: int,
-    user: models.User = Depends(get_active_superuser),
+    user: models.User = Depends(PermissionAdmin),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Event:
     """Retrieve event with GET request"""
@@ -62,7 +62,7 @@ async def event_delete(
 async def event_patch(
     id: int,
     schema: schemas.EventIn,
-    user: models.User = Depends(get_active_user),
+    user: models.User = Depends(PermissionUser),
     db_session: AsyncSession = Depends(db.get_database),
 ) -> models.Event:
     """Modify event with PATCH request"""

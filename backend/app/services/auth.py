@@ -19,7 +19,7 @@ class AuthService:
 
     def __init__(
             self,
-            secret: str = 'p!E@Zech@ngeme!',
+            secret: str,
             algorithm: str = 'HS256',
             expire: int = 30,
             token_url: str = 'token'):
@@ -83,7 +83,7 @@ class AuthService:
         to_encode.update({'exp': expire})
         encoded_jwt = jwt.encode(
             to_encode,
-            self.SECRET_KEY,
+            self.SECRET_KEY.get_secret_value(),
             algorithm=self.CRYPT_ALGORITHM)
         return encoded_jwt
 
