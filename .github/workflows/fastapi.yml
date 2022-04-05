@@ -1,0 +1,101 @@
+name: FastAPI and Pytest CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    name: Telegram Job Notify
+    steps:
+      - name: Send Message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_notification: true
+          disable_web_page_preview: true
+          format: html
+          message: |
+            👤 Commit by <a href="https://github.com/${{ github.actor }}"><b>${{ github.actor }}</b></a>
+            📦 <a href="https://github.com/${{ github.repository }}">${{ github.repository }}</a> @ ${{ github.ref }}
+            📝 <a href="https://github.com/${{ github.repository }}/commit/${{github.sha}}">${{ github.sha }}</a>
+            ✍️ <i>"${{ github.event.commits[0].message }}"</i>
+
+            <i>running Jobs...</i>
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        python-version:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+    name: Python ${{ matrix.python-version }} build on ${{ matrix.os }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Load Cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Poetry Dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install library
+        run: poetry install --no-interaction
+
+      - name: Run Pytest
+        run: |
+          source .venv/bin/activate
+          python -m pytest
+
+      - name: Telegram Success Message
+        if: ${{ success() }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_notification: true
+          disable_web_page_preview: true
+          message: |
+            🟢 Build succeeded!
+            Python ${{ matrix.python-version }} build on ${{ matrix.os }}
+
+      - name: Telegram Failure Message
+        if: ${{ failure() }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_web_page_preview: true
+          message: |
+            🔴 Build Failed!
+            Python ${{ matrix.python-version }} build on ${{ matrix.os }}
