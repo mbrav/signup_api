@@ -16,9 +16,9 @@ calendar_service = CalendarService(
 # Service startup
 async def start_scheduler():
     logger.info('Scheduler service startup BEGIN')
-    # await scheduler_service.add_task(
-    #     func=scheduler_service.get_db_tasks,
-    #     trigger='interval', seconds=5, max_instances=2)
+    await scheduler_service.add_task(
+        func=scheduler_service.get_db_tasks,
+        trigger='interval', seconds=5, max_instances=2)
     logger.info('Scheduler service startup DONE')
 
 
@@ -29,7 +29,7 @@ async def start_calendar():
     #     func=calendar_service.update_events,
     #     trigger='interval', seconds=300, max_instances=1)
 
-    # await calendar_service.update_events()
+    await calendar_service.update_events()
     logger.info('Google Calendar service startup DONE')
 
 

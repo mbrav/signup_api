@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import Update
 from app.config import settings
 from fastapi import APIRouter, BackgroundTasks, Body, Response, status
 
@@ -12,7 +11,7 @@ tg_router = APIRouter()
 
 
 async def feed_update(update: dict):
-    telegram_update = Update(**update)
+    telegram_update = types.Update(**update)
     Bot.set_current(dp.bot)
     Dispatcher.set_current(dp)
     await dp.process_update(telegram_update)
@@ -32,7 +31,7 @@ async def on_startup() -> None:
     current_url = (await dp.bot.get_webhook_info())['url']
     if current_url != settings.WEBHOOK_PATH:
         await dp.bot.set_webhook(url=settings.WEBHOOK_URL)
-    await dp.bot.send_message(settings.TG_ADMIN, 'Signup Bot.')
+    await dp.bot.send_message(settings.TELEGRAM_ADMIN, 'Signup Bot.')
 
 
 @tg_router.on_event('shutdown')

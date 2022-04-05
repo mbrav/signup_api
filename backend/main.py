@@ -67,8 +67,8 @@ if settings.LOGGING:
 async def startup_database():
     logger.info('FastAPI starting up...')
     async with db.engine.begin() as conn:
-        # if settings.TESTING:
-        #     await conn.run_sync(models.Base.metadata.drop_all)
+        if settings.TESTING:
+            await conn.run_sync(models.Base.metadata.drop_all)
         await conn.run_sync(models.Base.metadata.create_all)
     await db.engine.dispose()
     if settings.FIRST_SUPERUSER:

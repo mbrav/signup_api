@@ -16,18 +16,17 @@ async def create_superuser(
     Base.metadata.create_all(bind=engine)
     """
 
-    db_session = db.Session()
-    user = await models.User.get(db_session, raise_404=False)
+    async with db.Session() as db_session:
+        user = await models.User.get(db_session, raise_404=False)
 
-    if not user:
-        hashed_password = auth_service.hash_password(password)
-        user_in = schemas.UserCreate(
-            username=username,
-            password=hashed_password,
-            is_admin=True)
-        new_user = models.User(**user_in.dict())
-        await new_user.save(db_session)
-    await db_session.close()
+        if not user:
+            hashed_password = auth_service.hash_password(password)
+            user_in = schemas.UserCreate(
+                username=username,
+                password=hashed_password,
+                is_admin=True)
+            new_user = models.User(**user_in.dict())
+            await new_user.save(db_session)
 
 
 def random_lower_string(num: int = 20) -> str:

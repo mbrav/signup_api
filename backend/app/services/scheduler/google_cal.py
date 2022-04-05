@@ -7,6 +7,7 @@ from app.models import Event
 from app.schemas import EventCalIn
 from httpx import AsyncClient
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +65,6 @@ class CalendarService:
         self.cal_url = f'https://clients6.google.com/calendar/v3/calendars/{cal_id}/events'
         self.events = []
 
-        self.db_session = db.Session()
-
     def _setup(self, days_ago: int):
         """Setup event fetching 
 
@@ -98,24 +97,30 @@ class CalendarService:
         else:
             logger.error(log_message)
 
-    async def get_events_db(self) -> List[Event]:
-        """Fetch events from database"""
-
-        db_result = await Event.get_current(self.db_session)
-        db_events = db_result.scalars().all()
-
-        logger.debug(
-            f'Got {len(db_events)} events from db')
-
-        return db_events
-
     async def update_events(self):
         """Create new events in db or create new ones"""
 
-        db_events = await self.get_events_db()
+        await self.fetch_events()
+        async with db.Session() as db_session:
+            db_events = await self._get_events_db(db_session)
+            await self._update_events_db(db_session, db_events)
+
+    async def _get_events_db(self, db_session: AsyncSession) -> List[Event]:
+        """Fetch events from database"""
+
+        db_result = await Event.get_current(db_session)
+        db_events = db_result.scalars().all()
+        logger.debug(f'Got {len(db_events)} events from db')
+        return db_events
+
+    async def _update_events_db(
+        self,
+        db_session: AsyncSession,
+        db_events: list[Event]
+    ):
+        """Create new events in db or create new ones"""
         event_db_dict = {event.google_id: event for event in db_events}
 
-        await self.fetch_events()
         for event in self.events:
             google_id = event['id']
             name = event['summary']
@@ -135,7 +140,7 @@ class CalendarService:
                     google_modified=google_modified)
 
                 new_object = Event(**new_event.dict())
-                await new_object.save(self.db_session)
+                await new_object.save(db_session)
                 logger.debug(
                     f'Added #{google_id} - {name} to db ')
                 continue
@@ -156,6 +161,6 @@ class CalendarService:
                 event.start = start
                 event.end = end
                 event.google_modified = google_modified
-                await event.update(self.db_session, **event.__dict__)
+                await event.update(db_session, **event.__dict__)
                 logger.debug(
                     f'Updated #{google_id} - {name} in db ')

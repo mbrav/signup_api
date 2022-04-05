@@ -21,4 +21,5 @@ class EventCalIn(EventIn):
 
 class EventOut(EventCalIn):
     created_at: datetime
+    updated_at: Optional[datetime]
     id: int = Field(example=1)

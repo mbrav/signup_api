@@ -31,6 +31,7 @@ class User(BaseModel):
                  is_admin: bool = False):
 
         self.username = username
+        self.hashed_password = password
         self.tg_id = tg_id
         self.email = email
         self.first_name = first_name

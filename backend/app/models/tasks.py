@@ -45,7 +45,6 @@ class Task(BaseModel):
 
     async def _update_modified(self):
         """Update time of object when modified"""
-        self.updated_at = datetime.utcnow()
         processing = self.status in (
             TaskStatus.processing, TaskStatus.queued, TaskStatus.aborted)
         if not self.result and not processing:

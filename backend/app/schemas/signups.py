@@ -19,4 +19,5 @@ class SignupIn(BaseModel):
 
 class SignupOut(SignupIn):
     created_at: datetime
+    updated_at: Optional[datetime]
     id: int = Field(example=1)

@@ -28,16 +28,12 @@ class BaseModel(Base):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    created_at = Column(DateTime, default=datetime.utcnow())
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
 
     @declared_attr
     def __tablename__(self) -> str:
         return to_snake_case(self.__name__) + 's'
-
-    async def _update_modified(self):
-        """Update time of object when modified"""
-        self.updated_at = datetime.utcnow()
 
     async def save(self, db_session: AsyncSession):
         """Save object
@@ -119,7 +115,6 @@ class BaseModel(Base):
         for k, v in kwargs.items():
             setattr(self, k, v)
         try:
-            await self._update_modified()
             db_session.add(self)
             await db_session.commit()
             return self

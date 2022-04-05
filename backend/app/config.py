@@ -74,8 +74,9 @@ class AuthServiceMixin(SettingsBase):
 class ExternalServiceMixin(SettingsBase):
     """External Service Settings Mixin for bots, APIs etc."""
 
-    TELEGRAM_BOT_API_KEY: Optional[str] = Field(env='TELEGRAM_BOT_API_KEY')
-    TG_ADMIN: Optional[int] = Field(env='TG_ADMIN', default=12345678)
+    TELEGRAM_TOKEN: Optional[str] = Field(env='TELEGRAM_TOKEN')
+    TELEGRAM_ADMIN: Optional[int] = Field(
+        env='TELEGRAM_ADMIN', default=12345678)
 
     WEBHOOK_HOST: Optional[str] = Field(env='WEBHOOK_HOST')
     WEBHOOK_PATH: Optional[str] = Field(env='WEBHOOK_PATH', default='/bot')

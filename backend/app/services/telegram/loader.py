@@ -5,7 +5,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from app.config import settings
 
 bot = Bot(
-    settings.TELEGRAM_BOT_API_KEY,
+    settings.TELEGRAM_TOKEN,
     parse_mode=types.ParseMode.HTML
 )
 
