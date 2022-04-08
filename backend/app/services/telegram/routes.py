@@ -5,6 +5,7 @@ from aiogram import Bot, types
 from app.config import settings
 from fastapi import APIRouter, BackgroundTasks, Body, Response, status
 
+from .commands import set_bot_commands
 from .handlers import dp
 from .loader import bot
 
@@ -28,10 +29,11 @@ async def telegram_post(background_tasks: BackgroundTasks, update: Dict[str, Any
 async def on_startup() -> None:
     logging.info('Telegram bot startup')
     Bot.set_current(bot)
+    await set_bot_commands(bot)
     current_webhook = await bot.get_webhook_info()
     if current_webhook.url != settings.WEBHOOK_PATH:
         await bot.set_webhook(url=settings.WEBHOOK_URL)
-    await bot.send_message(settings.TELEGRAM_ADMIN, 'Signup Bot.')
+    await bot.send_message(settings.TELEGRAM_ADMIN, 'Signup Bot')
 
 
 @router.on_event('shutdown')

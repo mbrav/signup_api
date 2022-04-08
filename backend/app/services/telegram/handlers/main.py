@@ -1,71 +1,28 @@
-from aiogram import types
-from app import models, schemas
+from aiogram import F, types
+from aiogram.dispatcher.fsm.context import FSMContext
 from app.config import settings
-from app.db import Session
 
 from .. import texts
-from ..keyboards import start_keyboard
+from ..keyboards import signup_keyboard
 from ..loader import bot, dp
+from . import handlers, states
 
 
-@dp.message_handler(commands='start')
+@dp.message(commands=['start'])
+@dp.message(F.text.in_({'start', 'begin'}))
 async def start(message: types.Message):
     await message.reply(
-        texts.start_text.format(version=settings.VERSION),
-        reply_markup=start_keyboard)
+        texts.start_text.format(version=settings.VERSION))
 
 
-@dp.message_handler(commands='register')
+@dp.message(commands=['register'])
+@dp.message(F.text.in_({'register', 'login'}))
 async def register(message: types.Message):
-
-    async with Session() as db_session:
-        user = await models.User.get(
-            db_session, tg_id=message.from_user.id, raise_404=False)
-
-        if user:
-            return await message.reply(
-                texts.register_already.format(
-                    username=message.from_user.username))
-
-        await bot.send_message(
-            message.from_user.id, texts.register_create)
-
-        username = str(message.from_user.id) if not (
-            message.from_user.username) else message.from_user.username
-        schema = schemas.UserCreateTg(
-            username=username,
-            tg_id=message.from_user.id,
-            first_name=message.from_user.first_name,
-            last_name=message.from_user.last_name)
-        new_user = models.User(**schema.dict())
-
-        try:
-            created_user = await new_user.save(db_session)
-            await bot.send_message(
-                message.from_user.id,
-                texts.register_success.format(
-                    username=created_user.username))
-            await bot.send_message(
-                settings.TELEGRAM_ADMIN,
-                f'New user: {username}')
-        except Exception as ex:
-            await bot.send_message(
-                message.from_user.id,
-                texts.register_fail)
-            await bot.send_message(
-                settings.TELEGRAM_ADMIN,
-                f'Error creating account\n {repr(ex)}')
+    await handlers.user_registration(message)
 
 
-@dp.message_handler(commands='signup')
-async def signup(message: types.Message):
-    user_info = message.from_user
-    await bot.send_message(
-        settings.TELEGRAM_ADMIN,
-        f'Signup: {user_info.username}')
-
-
-@dp.message_handler(commands='help')
+@dp.message(commands=['help'])
+@dp.message(F.text.in_({'help', 'fuck'}))
 async def help(message: types.Message):
     user_info = message.from_user
 
@@ -75,5 +32,71 @@ async def help(message: types.Message):
             last_name=user_info.first_name,
             username=user_info.username,
             lang=user_info.language_code,
-            id=user_info.id,
-        ))
+            id=user_info.id))
+
+
+@dp.message(commands=['events'])
+@dp.message(F.text.in_({'events', 'calendar'}))
+async def events(message: types.Message, state: FSMContext):
+    page = await handlers.events_page()
+    await state.set_state(states.PaginationState)
+    await state.update_data(
+        name='events',
+        page_total=page.page_total,
+        page_current=page.page_current,
+        elements_total=page.elements_total)
+
+    await state.update_data(previous_state=None)
+    await state.update_data(previous_state=await state.get_state())
+
+    await bot.send_message(
+        message.chat.id,
+        page.text,
+        reply_markup=signup_keyboard)
+
+
+@dp.callback_query(F.data.startswith('inline_page_'))
+async def inline_pagination(call: types.CallbackQuery, state: FSMContext):
+    passed_state = await state.get_data()
+
+    page_current = passed_state.get('page_current', 1)
+    page_total = passed_state.get('page_total', 1)
+    # elements_total = passed_state.get('elements_total', 1)
+    name = passed_state.get('name', None)
+
+    if call.data == 'inline_page_left' and page_current > 1:
+        page_current -= 1
+    if call.data == 'inline_page_center':
+        page_current = 1
+    if call.data == 'inline_page_right' and page_current < page_total:
+        page_current += 1
+
+    await state.update_data(page_current=page_current)
+    await state.update_data(previous_state=None)
+    await state.update_data(previous_state=await state.get_state())
+
+    reply_markup, page = None, None
+    if name == 'events':
+        page = await handlers.events_page(page_current)
+        reply_markup = signup_keyboard
+
+    if not page:
+        return await bot.send_message(
+            call.from_user.id,
+            texts.inline_fail)
+
+    await call.message.edit_text(
+        page.text,
+        reply_markup=reply_markup)
+
+
+@dp.callback_query(F.data.startswith('inline_option_'))
+async def inline_option_detail(
+        call: types.CallbackQuery,
+        state: FSMContext):
+
+    selected_option = int(call.data.replace('inline_option_', ''))
+
+    await call.message.edit_text(
+        f'Selected option: {selected_option}',
+        reply_markup=None)

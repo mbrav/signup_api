@@ -36,12 +36,32 @@ class Event(BaseModel):
         self.google_id = google_id
 
     @classmethod
-    async def get_current(self, db_session: AsyncSession, days_ago: int = 1):
-        """Get events newer than days_ago"""
+    async def get_current(
+        self,
+        db_session: AsyncSession,
+        days_ago: int = 0,
+        limit: int = None,
+        offset: int = None,
+    ):
+        """Get events newer than days_ago
+
+        Args:
+            db_session (AsyncSession): Current db session
+            days_ago (int, optional): Ignore events before n days ago.
+            Defaults to 0.
+            limit (int, optional): limit result. Defaults to 0.
+            offset (int, optional): offset result. Defaults to 0.
+
+        Returns:
+            query result 
+        """
 
         db_query = select(self).where(
             self.start > datetime.utcnow() - timedelta(days=days_ago)
         ).order_by(
             self.start.asc())
+
+        if limit:
+            db_query = db_query.limit(limit).offset(offset)
 
         return await self.get_list(db_session, db_query=db_query)

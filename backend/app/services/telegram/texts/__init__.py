@@ -1,3 +1,3 @@
 
-from .buttons import *
+from .keyboards import *
 from .main import *
