@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, status
 from fastapi_pagination.ext.async_sqlalchemy import paginate
-from sqlalchemy import Column, DateTime, Integer, inspect, select
+from sqlalchemy import Column, DateTime, Integer, func, inspect, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -200,3 +200,10 @@ class BaseModel(Base):
     async def get_distinct(self, db_session: AsyncSession, *args) -> list:
         """Get list of specific model fields as rows"""
         return await db_session.execute(select(*args))
+
+    @classmethod
+    async def count(self, db_session: AsyncSession) -> int:
+        """Count number of objects"""
+        db_query = select([func.count()]).select_from(self)
+        result = await db_session.execute(db_query)
+        return result.scalar()

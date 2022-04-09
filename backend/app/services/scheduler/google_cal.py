@@ -57,22 +57,19 @@ class CalendarService:
             self,
             api_key: str,
             cal_id: str,
-            days_ago: int = 1):
+            days_ago: int = 0):
 
-        self._setup(days_ago=days_ago)
+        self.days_ago = days_ago
+        self._set_time()
         self.params = EventListParams(
             key=api_key, calendarId=cal_id, timeMin=self.iso)
         self.cal_url = f'https://clients6.google.com/calendar/v3/calendars/{cal_id}/events'
         self.events = []
 
-    def _setup(self, days_ago: int):
-        """Setup event fetching 
+    def _set_time(self):
+        """Setup event fetching time"""
 
-        Args:
-            days_ago (int): Ignore events older than n days
-        """
-
-        yesterday = datetime.utcnow() - timedelta(days=days_ago)
+        yesterday = datetime.utcnow() - timedelta(days=self.days_ago)
         self.iso = yesterday.astimezone().isoformat()
 
     async def fetch_events(self, sanitize: bool = False) -> List:
@@ -100,6 +97,7 @@ class CalendarService:
     async def update_events(self):
         """Create new events in db or create new ones"""
 
+        self._set_time()
         await self.fetch_events()
         async with db.Session() as db_session:
             db_events = await self._get_events_db(db_session)
@@ -108,10 +106,9 @@ class CalendarService:
     async def _get_events_db(self, db_session: AsyncSession) -> List[Event]:
         """Fetch events from database"""
 
-        db_result = await Event.get_current(db_session)
-        db_events = db_result.scalars().all()
-        logger.debug(f'Got {len(db_events)} events from db')
-        return db_events
+        events = await Event.get_current(db_session)
+        logger.debug(f'Got {len(events)} events from db')
+        return events
 
     async def _update_events_db(
         self,

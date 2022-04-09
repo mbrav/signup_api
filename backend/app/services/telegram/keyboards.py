@@ -29,9 +29,90 @@ start_keyboard = ReplyKeyboardMarkup(
         ]
     ])
 
+pagination_nav = [
+    InlineKeyboardButton(
+        text=texts.inline_signup_button_1,
+        callback_data='inline_page_left'),
+    InlineKeyboardButton(
+        text=texts.inline_signup_button_2,
+        callback_data='inline_page_center'),
+    InlineKeyboardButton(
+        text=texts.inline_signup_button_3,
+        callback_data='inline_page_right')
+]
 
-signup_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
+
+def signup_detail_nav(
+    selected: bool = False,
+    notification: bool = False
+) -> InlineKeyboardMarkup:
+    """Generate signup detail based on states"""
+
+    keys = [
+        InlineKeyboardButton(
+            text=texts.inline_detail_action_1,
+            callback_data='inline_detail_back')
+    ]
+
+    if selected:
+        keys.append(
+            InlineKeyboardButton(
+                text=texts.inline_detail_action_3,
+                callback_data='inline_detail_unselect'))
+    else:
+        keys.append(
+            InlineKeyboardButton(
+                text=texts.inline_detail_action_2,
+                callback_data='inline_detail_select'))
+
+    if notification:
+        keys.append(
+            InlineKeyboardButton(
+                text=texts.notify_on,
+                callback_data='inline_detail_notify_on'))
+    else:
+        keys.append(
+            InlineKeyboardButton(
+                text=texts.notify_off,
+                callback_data='inline_detail_notify_off'))
+
+    keyboard = [keys]
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def pagination_keyboard(
+        options: int,
+        cols: int = 5
+) -> InlineKeyboardMarkup:
+    """Pagination keyboard generator algorithm based on pagination params"""
+
+    # if cols > 8:
+    #     # 8 is maximum number of buttons for telegram
+    #     cols = 8
+
+    # pages = options // cols
+    # remainder = options % cols
+
+    # keyboard = []
+    # index = 1
+    # while index <= options:
+    #     if options <= 10:
+    #         i = 0
+    #         if index < 5:
+    #             i = 1
+    #         # keyboard[i].append(
+    #         #     InlineKeyboardButton(
+    #         #         text=emoji_num[index],
+    #         #         callback_data=f'inline_option_{index}'))
+    #         keyboard.append(f'inline_option_{index}')
+    #     else:
+    #         pass
+    #     index += 1
+
+    # keyboard.append(pagination_nav)
+    # return keyboard
+
+    keyboard = [
         [
             InlineKeyboardButton(
                 text=emoji_num[1],
@@ -66,15 +147,7 @@ signup_keyboard = InlineKeyboardMarkup(
                 text=emoji_num[10],
                 callback_data='inline_option_10'),
         ],
-        [
-            InlineKeyboardButton(
-                text=texts.signup_inline_button_1,
-                callback_data='inline_page_left'),
-            InlineKeyboardButton(
-                text=texts.signup_inline_button_2,
-                callback_data='inline_page_center'),
-            InlineKeyboardButton(
-                text=texts.signup_inline_button_3,
-                callback_data='inline_page_right')
-        ]
-    ])
+        pagination_nav
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)

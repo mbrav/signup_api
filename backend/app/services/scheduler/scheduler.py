@@ -43,9 +43,7 @@ class SchedulerService:
         """Get new tasks from db"""
 
         async with db.Session() as db_session:
-            db_tasks = await Task.get_executable_tasks(db_session)
-            tasks = db_tasks.scalars().all()
-
+            tasks = await Task.get_executable_tasks(db_session)
             for task in tasks:
                 if task not in self.task_pool:
                     self.task_pool.append(task)

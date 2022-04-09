@@ -10,6 +10,7 @@ class Page:
     page_total: int
     page_current: int
     elements_total: int
+    elements_id_dict: dict
 
 
 class PaginationState(StatesGroup):
@@ -18,3 +19,5 @@ class PaginationState(StatesGroup):
     page_current = State()
     elements_total = State()
     previous_state = State()
+    elements_current = State()
+    id_dict = State()

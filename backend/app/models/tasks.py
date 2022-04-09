@@ -91,8 +91,8 @@ class Task(BaseModel):
             self.planned_for < datetime.utcnow()
         )).order_by(
             self.created_at.asc())
-
-        return await self.get_list(db_session, db_query=db_query)
+        result = await self.get_list(db_session, db_query=db_query)
+        return result.scalars().all()
 
     @classmethod
     async def get_expired_tasks(self, db_session: AsyncSession):
@@ -101,4 +101,5 @@ class Task(BaseModel):
             self.status == TaskStatus.expired,
         )).order_by(
             self.created_at.asc())
-        return await self.get_list(db_session, db_query=db_query)
+        result = await self.get_list(db_session, db_query=db_query)
+        return result.scalars().all()

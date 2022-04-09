@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import Column, DateTime, String, Text, select
+from sqlalchemy import Column, DateTime, String, Text, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship
 
@@ -41,7 +41,7 @@ class Event(BaseModel):
         db_session: AsyncSession,
         days_ago: int = 0,
         limit: int = None,
-        offset: int = None,
+        offset: int = 0
     ):
         """Get events newer than days_ago
 
@@ -57,11 +57,25 @@ class Event(BaseModel):
         """
 
         db_query = select(self).where(
-            self.start > datetime.utcnow() - timedelta(days=days_ago)
+            self.start > datetime.utcnow() - timedelta(days=days_ago+1)
         ).order_by(
             self.start.asc())
 
         if limit:
             db_query = db_query.limit(limit).offset(offset)
 
-        return await self.get_list(db_session, db_query=db_query)
+        result = await self.get_list(db_session, db_query=db_query)
+        return result.scalars().all()
+
+    @classmethod
+    async def get_current_count(
+        self,
+        db_session: AsyncSession,
+        days_ago: int = 0,
+    ) -> int:
+        """Return count only of events newer than days_ago"""
+
+        db_query = select([func.count()]).select_from(self).where(
+            self.start > datetime.utcnow() - timedelta(days=days_ago+1))
+        result = await db_session.execute(db_query)
+        return result.scalar()

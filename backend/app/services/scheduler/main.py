@@ -27,7 +27,7 @@ async def start_calendar():
     logger.info('Google Calendar service startup BEGIN')
     await scheduler_service.add_task(
         func=calendar_service.update_events,
-        trigger='interval', seconds=300, max_instances=1)
+        trigger='interval', seconds=30, max_instances=1)
     logger.info('Google Calendar service startup DONE')
 
 

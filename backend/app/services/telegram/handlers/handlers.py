@@ -1,7 +1,9 @@
 
+import asyncio
 from datetime import datetime
 
 from aiogram import types
+from aiogram.dispatcher.fsm.context import FSMContext
 from app import models, schemas
 from app.config import settings
 from app.db import Session
@@ -12,8 +14,10 @@ from ..loader import bot
 from .states import Page
 
 
-def time_text(dt: datetime):
-    return dt.strftime('%d/%m/%Y, %H:%M')
+def time_text(dt: datetime, time_only=False):
+    if time_only:
+        return dt.strftime('%H:%M')
+    return dt.strftime('%A, %-d %B %H:%M')
 
 
 async def user_registration(message: types.Message) -> None:
@@ -59,23 +63,43 @@ async def user_registration(message: types.Message) -> None:
 async def events_page(page_current: int = 1, limit: int = 10) -> Page:
     offset = (limit*page_current)-limit
     async with Session() as db_session:
-        db_result = await models.Event.get_current(
+        db_events = await models.Event.get_current(
             db_session, limit=limit, offset=offset)
-        db_events = db_result.scalars().all()
-        db_all = await models.Event.get_current(db_session)
 
-        # TODO: optimize db query to get count instead of objects
-        elements_total = len(db_all.scalars().all())
-        page_total = elements_total // limit + 1
+        elements_total = await models.Event.get_current_count(db_session)
+        page_total = (elements_total // limit) + 1
 
     text = texts.events_page_body.format(
         page_current=page_current,
         page_total=page_total,
         elements_total=elements_total)
 
+    event_ids = {}
     for index, event in enumerate(db_events):
+        event_ids[index+1] = event.id
         text += texts.events_page_detail.format(
             index=emoji_num[index+1],
             name=event.name,
-            start=time_text(event.start))
-    return Page(text, page_total, page_current, elements_total)
+            start=time_text(event.start),
+            end=time_text(event.end, True))
+    return Page(text, page_total, page_current, elements_total, event_ids)
+
+
+async def event_detail(id: int) -> Page:
+    async with Session() as db_session:
+        db_result = await models.Event.get(db_session, id=id, raise_404=False)
+    return db_result
+
+
+async def get_valid_state(call: types.CallbackQuery, state: FSMContext) -> types.Message:
+    passed_state = await state.get_data()
+    if not passed_state:
+        seconds = 5
+        while seconds > 0:
+            await call.message.edit_text(
+                texts.inline_expired_destroy.format(seconds=seconds),
+                reply_markup=None)
+            await asyncio.sleep(1)
+            seconds -= 1
+        await call.message.delete()
+    return passed_state
