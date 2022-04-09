@@ -32,7 +32,9 @@ async def on_startup() -> None:
     await set_bot_commands(bot)
     current_webhook = await bot.get_webhook_info()
     if current_webhook.url != settings.WEBHOOK_PATH:
-        await bot.set_webhook(url=settings.WEBHOOK_URL)
+        await bot.set_webhook(
+            url=settings.WEBHOOK_URL,
+            certificate=settings.SSL_PUBLIC)
     await bot.send_message(settings.TELEGRAM_ADMIN, 'Signup Bot')
 
 

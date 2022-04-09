@@ -151,3 +151,4 @@ data/
 logs/
 */node_modules/
 frontend/package-lock.json
+**/ssl/*

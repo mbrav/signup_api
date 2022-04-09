@@ -1,7 +1,9 @@
+import base64
 from datetime import timezone
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from pydantic import AnyHttpUrl, BaseSettings, Field, PostgresDsn, SecretStr
+from pydantic import (AnyHttpUrl, BaseSettings, Field, FilePath, PostgresDsn,
+                      SecretStr, validator)
 
 
 class SettingsBase(BaseSettings):
@@ -24,10 +26,22 @@ class SettingsBase(BaseSettings):
     API_V1_STR: str = Field(env='API_V1_STR', default='/api')
     TIMEZONE: timezone = Field(timezone.utc)
 
+    SSL_PUBLIC_PATH: Optional[FilePath] = Field(
+        env='SSL_PUBLIC_PATH', default=None)
+
     class Config:
         env_file = '.env'
         env_prefix = ''
         # case_sensitive = True
+
+    @property
+    def SSL_PUBLIC(self) -> Optional[Any]:
+        if self.SSL_PUBLIC_PATH:
+            with open(self.SSL_PUBLIC_PATH) as key:
+                string = key.read().encode('utf-8')
+                encodedBytes = base64.b64encode(string)
+                return str(encodedBytes, 'utf-8')
+        return None
 
 
 class DBSettings(SettingsBase):
@@ -79,15 +93,23 @@ class ExternalServiceMixin(SettingsBase):
         env='TELEGRAM_ADMIN', default=12345678)
 
     WEBHOOK_HOST: Optional[str] = Field(env='WEBHOOK_HOST')
+    WEBHOOK_PORT: Optional[int] = Field(env='WEBHOOK_PORT', default=80)
     WEBHOOK_PATH: Optional[str] = Field(env='WEBHOOK_PATH', default='/bot')
 
     CAL_API_KEY: Optional[SecretStr] = Field(env='CAL_API_KEY')
     CAL_ID: Optional[SecretStr] = Field(env='CAL_ID')
 
     @property
-    def WEBHOOK_URL(self) -> str:
-        url = f'{self.WEBHOOK_HOST}{self.WEBHOOK_PATH}'
+    def WEBHOOK_URL(self) -> AnyHttpUrl:
+        port = f':{self.WEBHOOK_PORT}' if (self.WEBHOOK_PORT != 80) else ''
+        url = f'{self.WEBHOOK_HOST}{port}{self.WEBHOOK_PATH}'
         return url
+
+    @validator('WEBHOOK_PORT')
+    def WEBHOOK_PORT_valid(cls, v):
+        error = 'Tg webhook can be set up only on ports 80, 88, 443 or 8443'
+        assert v in (80, 88, 443, 8443), error
+        return v
 
 
 class Settings(
@@ -100,3 +122,4 @@ class Settings(
 
 
 settings = Settings()
+test = settings
