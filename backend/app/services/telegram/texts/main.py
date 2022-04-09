@@ -57,7 +57,7 @@ inline_expired_destroy = inline_expired + """
 """
 
 events_page_body = """
-<b>Page:</b> {page_current}/{page_total}
+<b>Page:</b> {page_current}/{pages_total}
 <b>Events: {elements_total}</b>
 """
 

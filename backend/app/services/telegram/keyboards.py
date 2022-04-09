@@ -43,27 +43,28 @@ pagination_nav = [
 
 
 def signup_detail_nav(
+    id: int,
     selected: bool = False,
-    notification: bool = False
+    notification: bool = False,
 ) -> InlineKeyboardMarkup:
     """Generate signup detail based on states"""
 
     keys = [
         InlineKeyboardButton(
             text=texts.inline_detail_action_1,
-            callback_data='inline_detail_back')
+            callback_data='inline_page_center')
     ]
 
     if selected:
         keys.append(
             InlineKeyboardButton(
                 text=texts.inline_detail_action_3,
-                callback_data='inline_detail_unselect'))
+                callback_data=f'inline_detail_{id}'))
     else:
         keys.append(
             InlineKeyboardButton(
                 text=texts.inline_detail_action_2,
-                callback_data='inline_detail_select'))
+                callback_data=f'inline_detail_{id}'))
 
     if notification:
         keys.append(

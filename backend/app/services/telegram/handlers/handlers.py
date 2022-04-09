@@ -67,11 +67,11 @@ async def events_page(page_current: int = 1, limit: int = 10) -> Page:
             db_session, limit=limit, offset=offset)
 
         elements_total = await models.Event.get_current_count(db_session)
-        page_total = (elements_total // limit) + 1
+        pages_total = (elements_total // limit) + 1
 
     text = texts.events_page_body.format(
         page_current=page_current,
-        page_total=page_total,
+        pages_total=pages_total,
         elements_total=elements_total)
 
     event_ids = {}
@@ -82,7 +82,33 @@ async def events_page(page_current: int = 1, limit: int = 10) -> Page:
             name=event.name,
             start=time_text(event.start),
             end=time_text(event.end, True))
-    return Page(text, page_total, page_current, elements_total, event_ids)
+
+    return Page(text=text,
+                name='events',
+                pages_total=pages_total,
+                page_current=page_current,
+                elements_total=elements_total,
+                elements_id_dict=event_ids)
+
+
+async def create_signup(call: types.CallbackQuery, event_id: int) -> bool:
+    async with Session() as db_session:
+        try:
+            user = await models.User.get(db_session, tg_id=call.from_user.id)
+        except Exception:
+            return await call.message.edit_text(
+                texts.register_not,
+                reply_markup=None)
+        try:
+            event = await models.Event.get(db_session, id=event_id)
+        except Exception:
+            return await call.message.edit_text(
+                texts.inline_fail,
+                reply_markup=None)
+
+        new_signup = models.Signup(user_id=user.id, event_id=event.id)
+        await new_signup.save(db_session)
+    return True
 
 
 async def event_detail(id: int) -> Page:
@@ -91,7 +117,7 @@ async def event_detail(id: int) -> Page:
     return db_result
 
 
-async def get_valid_state(call: types.CallbackQuery, state: FSMContext) -> types.Message:
+async def get_valid_state(call: types.CallbackQuery, state: FSMContext) -> FSMContext:
     passed_state = await state.get_data()
     if not passed_state:
         seconds = 5

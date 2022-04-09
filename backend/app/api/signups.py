@@ -22,7 +22,6 @@ async def signup_post(
 ) -> models.Signup:
     """Create new signup with POST request"""
 
-    schema.user_id = user.id
     new_object = models.Signup(**schema.dict())
     return await new_object.save(db_session)
 
@@ -83,10 +82,6 @@ async def signups_list(
     desc: Optional[bool] = SortByDescQuery,
     user_id: Optional[int] = FilterQuery,
     event_id: Optional[int] = FilterQuery,
-    first_name: Optional[str] = FilterQuery,
-    last_name: Optional[str] = FilterQuery,
-    phone: Optional[str] = FilterQuery,
-    email: Optional[str] = FilterQuery,
 ):
     """List signups with GET request"""
 
@@ -94,10 +89,6 @@ async def signups_list(
         db_session,
         desc=desc,
         sort_by=sort_by,
-        first_name=first_name,
-        last_name=last_name,
-        phone=phone,
-        email=email,
         event_id=event_id,
         user_id=user_id,
     )

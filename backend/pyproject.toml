@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "signup_api"
-version = "0.1.6"
+version = "0.1.7"
 description = "An 100% asynchronous Fast API service for signups and Telegram integration"
 authors = ["mbrav <mbrav@protonmail.com>"]
 
