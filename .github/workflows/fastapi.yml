@@ -3,15 +3,16 @@ name: FastAPI and Pytest CI
 on:
   push:
     branches:
-      - "main"
-      # - "**"
+      # - "main"
+      - "**"
   pull_request:
     branches:
       - "**"
 
 jobs:
   notify:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: self-hosted
     name: Telegram Job Notify
     steps:
       - name: Send Message
@@ -35,7 +36,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+          # - ubuntu-latest
+          - self-hosted
         python-version:
           - "3.8"
           - "3.9"
