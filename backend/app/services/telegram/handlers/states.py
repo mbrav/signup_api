@@ -11,10 +11,9 @@ class Page(BaseModel):
     name: Optional[str]
     pages_total: Optional[int]
     page_current: Optional[int]
-    elements_total: Optional[int]
-    elements_id_dict: Optional[dict]
-    previous_state: Optional[Any]
+    elements_ids: Optional[list]
 
 
 class BotState(StatesGroup):
     page_view = State()
+    account_view = State()

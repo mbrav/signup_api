@@ -64,8 +64,7 @@ class Event(BaseModel):
         if limit:
             db_query = db_query.limit(limit).offset(offset)
 
-        result = await self.get_list(db_session, db_query=db_query)
-        return result.scalars().all()
+        return await self.get_list(db_session, db_query=db_query)
 
     @classmethod
     async def get_current_count(

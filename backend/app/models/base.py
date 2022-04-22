@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from fastapi import HTTPException, status
 from fastapi_pagination.ext.async_sqlalchemy import paginate
@@ -109,7 +110,7 @@ class BaseModel(Base):
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=repr(ex))
 
-    async def update(self, db_session: AsyncSession, **kwargs):
+    async def update(self, db_session: AsyncSession, **kwargs) -> None:
         """Update model object with provided attributes"""
 
         for k, v in kwargs.items():
@@ -123,7 +124,7 @@ class BaseModel(Base):
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=repr(ex))
 
-    async def delete(self, db_session: AsyncSession):
+    async def delete(self, db_session: AsyncSession) -> None:
         """Delete model object from database"""
 
         try:
@@ -187,9 +188,10 @@ class BaseModel(Base):
                 detail=repr(ex))
 
     @classmethod
-    async def get_list(self, db_session: AsyncSession, **kwargs) -> paginate:
+    async def get_list(self, db_session: AsyncSession, **kwargs) -> List:
         """Get list of objects"""
-        return await self._get_objects(db_session, paginated=False, **kwargs)
+        result = await self._get_objects(db_session, paginated=False, **kwargs)
+        return result.scalars().all()
 
     @classmethod
     async def paginate(self, db_session: AsyncSession, **kwargs) -> paginate:
@@ -197,7 +199,7 @@ class BaseModel(Base):
         return await self._get_objects(db_session, paginated=True, **kwargs)
 
     @classmethod
-    async def get_distinct(self, db_session: AsyncSession, *args) -> list:
+    async def get_distinct(self, db_session: AsyncSession, *args) -> List:
         """Get list of specific model fields as rows"""
         return await db_session.execute(select(*args))
 

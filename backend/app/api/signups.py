@@ -82,6 +82,7 @@ async def signups_list(
     desc: Optional[bool] = SortByDescQuery,
     user_id: Optional[int] = FilterQuery,
     event_id: Optional[int] = FilterQuery,
+    notification: Optional[bool] = FilterQuery,
 ):
     """List signups with GET request"""
 

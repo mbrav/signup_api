@@ -1,14 +1,16 @@
 command1_detail = 'Begin bot'
-command2_detail = 'Get help info'
-command3_detail = 'Register new account'
-command4_detail = 'Get current list of events'
+command2_detail = 'Register new account'
+command3_detail = 'Get current list of events'
+command4_detail = 'My account'
+command5_detail = 'Get help info'
 
 help_text = f"""
 <b>Available Commands:</b>
 /start - {command1_detail}
-/help - {command2_detail}
-/register - {command3_detail}
-/events - {command4_detail}
+/register - {command2_detail}
+/events - {command3_detail}
+/me - {command4_detail}
+/help - {command5_detail}
 """
 
 help_text_extra = help_text + """
@@ -25,6 +27,11 @@ start_text = """
 This is signup_api v{version}!
 Powered by aiogram
 """ + help_text
+
+my_account = """
+👤<b>My account</b>
+📝<b>Signups:</b> {signup_count}
+"""
 
 register_create = '🤖Creating new account ...'
 

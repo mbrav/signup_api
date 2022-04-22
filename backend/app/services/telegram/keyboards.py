@@ -1,7 +1,10 @@
+from typing import Optional
+
 from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup)
 
 from . import texts
+from .callbacks import Action, EventCallback, MeCallback, PageNav
 
 emoji_num = [
     '0️⃣',
@@ -17,72 +20,97 @@ emoji_num = [
     '🔟',
 ]
 
-start_keyboard = ReplyKeyboardMarkup(
-    resize_keyboard=True,
-    one_time_keyboard=True,
-    keyboard=[
+me_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
         [
-            KeyboardButton(text=texts.start_button_1),
-            KeyboardButton(text=texts.start_button_2),
-            KeyboardButton(text=texts.start_button_3,
-                           request_contact=True)
+            InlineKeyboardButton(
+                text=texts.inline_me_button_1,
+                callback_data=MeCallback(
+                    action=Action.signups).pack()),
+            InlineKeyboardButton(
+                text=texts.inline_me_button_2,
+                callback_data=MeCallback(
+                    action=Action.account).pack()),
+            InlineKeyboardButton(
+                text=texts.inline_me_button_3,
+                callback_data=MeCallback(
+                    action=Action.settings).pack()),
+            # KeyboardButton(text=texts.inline_me_button_3,
+            #                request_contact=True)
         ]
     ])
 
 pagination_nav = [
     InlineKeyboardButton(
         text=texts.inline_signup_button_1,
-        callback_data='inline_page_left'),
+        callback_data=EventCallback(page_nav=PageNav.left).pack()),
     InlineKeyboardButton(
         text=texts.inline_signup_button_2,
-        callback_data='inline_page_center'),
+        callback_data=EventCallback(page_nav=PageNav.center).pack()),
     InlineKeyboardButton(
         text=texts.inline_signup_button_3,
-        callback_data='inline_page_right')
+        callback_data=EventCallback(page_nav=PageNav.right).pack())
 ]
 
 
 def signup_detail_nav(
     id: int,
     selected: bool = False,
-    notification: bool = False,
+    notification: Optional[bool] = None,
 ) -> InlineKeyboardMarkup:
-    """Generate signup detail based on states"""
+    """Generate signup detail based on states
+
+    Args:
+        id (int): id of the object to dispaly in inline context
+        selected (bool, optional): Selected of not selected state. Defaults to False.
+        notification (bool, optional): Pass state option notification state.
+            Generates if either True or False. Defaults to None.
+
+    Returns:
+        InlineKeyboardMarkup: Generated keyboard
+    """
 
     keys = [
         InlineKeyboardButton(
-            text=texts.inline_detail_action_1,
-            callback_data='inline_page_center')
+            text=texts.inline_signup_action_1,
+            callback_data=EventCallback(page_nav=PageNav.center).pack())
     ]
 
     if selected:
         keys.append(
             InlineKeyboardButton(
-                text=texts.inline_detail_action_3,
-                callback_data=f'inline_detail_{id}'))
+                text=texts.inline_signup_action_3,
+                callback_data=EventCallback(
+                    action=Action.signup,
+                    option_id=id).pack()))
     else:
         keys.append(
             InlineKeyboardButton(
-                text=texts.inline_detail_action_2,
-                callback_data=f'inline_detail_{id}'))
+                text=texts.inline_signup_action_2,
+                callback_data=EventCallback(
+                    action=Action.signup,
+                    option_id=id).pack()))
 
-    if notification:
+    if notification is True:
         keys.append(
             InlineKeyboardButton(
-                text=texts.notify_on,
-                callback_data='inline_detail_notify_on'))
-    else:
+                text=texts.inline_notify_on,
+                callback_data=EventCallback(
+                    action=Action.notify_toggle,
+                    option_id=id).pack()))
+    elif notification is False:
         keys.append(
             InlineKeyboardButton(
-                text=texts.notify_off,
-                callback_data='inline_detail_notify_off'))
-
+                text=texts.inline_notify_off,
+                callback_data=EventCallback(
+                    action=Action.notify_toggle,
+                    option_id=id).pack()))
     keyboard = [keys]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
 def pagination_keyboard(
-        options: int,
+        ids: list,
         cols: int = 5
 ) -> InlineKeyboardMarkup:
     """Pagination keyboard generator algorithm based on pagination params"""
@@ -104,8 +132,8 @@ def pagination_keyboard(
     #         # keyboard[i].append(
     #         #     InlineKeyboardButton(
     #         #         text=emoji_num[index],
-    #         #         callback_data=f'inline_option_{index}'))
-    #         keyboard.append(f'inline_option_{index}')
+    #         #         callback_data=f'inline_events_option_{index}'))
+    #         keyboard.append(f'inline_events_option_{index}')
     #     else:
     #         pass
     #     index += 1
@@ -117,36 +145,46 @@ def pagination_keyboard(
         [
             InlineKeyboardButton(
                 text=emoji_num[1],
-                callback_data='inline_option_1'),
+                callback_data=EventCallback(
+                    option_id=ids[0]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[2],
-                callback_data='inline_option_2'),
+                callback_data=EventCallback(
+                    option_id=ids[1]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[3],
-                callback_data='inline_option_3'),
+                callback_data=EventCallback(
+                    option_id=ids[2]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[4],
-                callback_data='inline_option_4'),
+                callback_data=EventCallback(
+                    option_id=ids[3]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[5],
-                callback_data='inline_option_5'),
+                callback_data=EventCallback(
+                    option_id=ids[4]).pack()),
         ],
         [
             InlineKeyboardButton(
                 text=emoji_num[6],
-                callback_data='inline_option_6'),
+                callback_data=EventCallback(
+                    option_id=ids[5]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[7],
-                callback_data='inline_option_7'),
+                callback_data=EventCallback(
+                    option_id=ids[6]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[8],
-                callback_data='inline_option_8'),
+                callback_data=EventCallback(
+                    option_id=ids[7]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[9],
-                callback_data='inline_option_9'),
+                callback_data=EventCallback(
+                    option_id=ids[8]).pack()),
             InlineKeyboardButton(
                 text=emoji_num[10],
-                callback_data='inline_option_10'),
+                callback_data=EventCallback(
+                    option_id=ids[9]).pack()),
         ],
         pagination_nav
     ]

@@ -18,6 +18,9 @@ async def set_bot_commands(bot: Bot):
             description=texts.command3_detail),
         BotCommand(
             command='events',
-            description=texts.command4_detail)]
+            description=texts.command4_detail),
+        BotCommand(
+            command='me',
+            description=texts.command5_detail)]
     await bot.set_my_commands(
         commands=commands, scope=BotCommandScopeAllPrivateChats())
