@@ -1,35 +1,35 @@
 [tool.poetry]
 name = "signup_api"
-version = "0.1.7"
+version = "0.1.8"
 description = "An 100% asynchronous Fast API service for signups and Telegram integration"
 authors = ["mbrav <mbrav@protonmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-fastapi = "*"
-fastapi-pagination = "*"
-pydantic = {extras = ["email", "dotenv"], version = "*"}
-uvicorn = {extras = ["standard"], version = "*"}
-SQLAlchemy = "*"
+fastapi = "^0.77.1"
+fastapi-pagination = "^0.9"
+pydantic = {extras = ["email", "dotenv"], version = "^1.9"}
+uvicorn = {extras = ["standard"], version = "^0.17"}
+SQLAlchemy = "^1.4"
 asyncpg = "*"
-python-jose = {extras = ["cryptography"], version = "*"}
-passlib = {extras = ["argon2"], version = "*"}
+python-jose = {extras = ["cryptography"], version = "^3.3"}
+passlib = {extras = ["argon2"], version = "^1.7"}
 python-multipart = "*"
-httpx = {extras = ["http2"], version = "*"}
-APScheduler = "*"
+httpx = {extras = ["http2"], version = "^0.22"}
+APScheduler = "^3.9"
 transliterate = "*"
-aiogram = "3.0.0b3"
+aiogram = "^3.0.0b3"
 
 
 [tool.poetry.dev-dependencies]
-pytest = "*"
+pytest = "^7.1"
 pytest-env = "*"
 pytest-asyncio = "*"
 flake8 = "*"
 autopep8 = "*"
 
 [tool.pytest.ini_options]
-minversion = "6.2"
+minversion = "7.0"
 testpaths = [
     "tests/",
 ]

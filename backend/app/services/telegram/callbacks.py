@@ -10,8 +10,10 @@ class PageNav(str, Enum):
 
 
 class Action(str, Enum):
-    notify_toggle = 'notify_toggle'
+    back = 'back'
     signup = 'signup'
+    signup_cancel = 'signup_cancel'
+    notify_toggle = 'notify_toggle'
     signups = 'signups'
     account = 'account'
     settings = 'settings'

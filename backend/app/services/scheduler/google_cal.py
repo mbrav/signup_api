@@ -95,7 +95,7 @@ class CalendarService:
             logger.error(log_message)
 
     async def update_events(self):
-        """Create new events in db or create new ones"""
+        """Update events in db or create new ones"""
 
         self._set_time()
         await self.fetch_events()

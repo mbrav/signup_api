@@ -18,6 +18,7 @@ class UserUpdate(UserBase):
     email: Optional[EmailStr] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    language_code: Optional[str] = 'en'
     password: Optional[str] = None
 
 

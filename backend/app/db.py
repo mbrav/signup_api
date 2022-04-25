@@ -21,7 +21,7 @@ Session = sessionmaker(
 )
 
 
-# Dependency
+# FastAPI Dependency
 async def get_database() -> AsyncSession:
     async with Session() as session:
         try:

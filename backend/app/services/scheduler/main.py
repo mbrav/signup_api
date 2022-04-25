@@ -31,11 +31,11 @@ async def start_calendar():
     logger.info('Google Calendar service startup DONE')
 
 
-# Dependency
+# FastAPI Dependency
 async def get_scheduler() -> SchedulerService:
     yield scheduler_service
 
 
-# Dependency
+# FastAPI Dependency
 async def get_calendar() -> CalendarService:
     yield calendar_service

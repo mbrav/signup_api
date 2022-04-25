@@ -75,6 +75,6 @@ class Event(BaseModel):
         """Return count only of events newer than days_ago"""
 
         db_query = select([func.count()]).select_from(self).where(
-            self.start > datetime.utcnow() - timedelta(days=days_ago+1))
+            self.start > datetime.utcnow() - timedelta(days=days_ago))
         result = await db_session.execute(db_query)
         return result.scalar()

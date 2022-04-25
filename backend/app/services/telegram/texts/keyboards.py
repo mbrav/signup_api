@@ -1,6 +1,6 @@
-inline_me_button_1 = 'My Signups'
-inline_me_button_2 = 'My Account'
-inline_me_button_3 = 'My Settings'
+inline_me_button_1 = '📝My Signups'
+inline_me_button_2 = '👤My Account'
+inline_me_button_3 = '⚙️My Settings'
 
 inline_signup_button_1 = '⬅️'
 inline_signup_button_2 = 'First Page'

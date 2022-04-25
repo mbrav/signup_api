@@ -21,16 +21,54 @@ def time_text(dt: datetime, time_only=False):
     return dt.strftime('%A, %-d %B %H:%M')
 
 
-async def _user_get_or_create(message: types.Message, registration: bool = False) -> Union[None, models.Signup]:
+# GENERAL HANDLER FUNCTIONS
+
+async def get_valid_state(call: types.CallbackQuery, state: FSMContext) -> FSMContext:
+    """Check for expiration validity of a callback
+
+    If not valid, create a countdown destruction of the the message.
+
+    TODO: Investigate whether the asyncio.sleep function causes a delay for the
+    the whole loop and not just the user. Ideally, it should not cause a delay
+    for either.
+
+    Args:
+        call (types.CallbackQuery): Inline call of the current context
+        state (FSMContext): Finite state machine context
+
+    Returns:
+        FSMContext: Return the context
+    """
+    passed_state = await state.get_data()
+    if not passed_state:
+        seconds = 5
+        while seconds > 0:
+            await call.message.edit_text(
+                texts.inline_expired_destroy.format(seconds=seconds),
+                reply_markup=None)
+            await asyncio.sleep(1)
+            seconds -= 1
+        await call.message.delete()
+    return passed_state
+
+
+# USER HANDLERS
+
+async def _user_get_or_create(
+    message: Union[types.Message, types.CallbackQuery],
+    registration: bool = False
+) -> Union[None, models.Signup]:
     """Get or register new user
 
     Args:
-        message (types.Message): Incoming message to work with
-        registration (bool, optional): Registeration process. Defaults to False.
+        message (Union[types.Message, types.CallbackQuery]):
+            Incoming message or callback to work with
+        registration (bool, optional): Registration process. Defaults to False.
 
     Returns:
         Union[None, models.Signup]: Returns None or user
     """
+
     async with Session() as db_session:
         user = await models.User.get(
             db_session, tg_id=message.from_user.id, raise_404=False)
@@ -72,7 +110,8 @@ async def _user_get_or_create(message: types.Message, registration: bool = False
 
     if not user:
         return await bot.send_message(
-            message.from_user.id)
+            message.from_user.id,
+            texts.register_not)
     return user
 
 
@@ -80,8 +119,23 @@ async def user_registration(message: types.Message) -> None:
     await _user_get_or_create(message, registration=True)
 
 
-async def user_profile(message: types.Message) -> models.User:
+async def user_profile(message: Union[types.Message, types.CallbackQuery]) -> models.User:
     return await _user_get_or_create(message)
+
+
+async def user_signup_count(user_id: int) -> int:
+    # TODO: implement a more efficient query for object count
+    async with Session() as db_session:
+        signups = await models.Signup.by_user(db_session, user_id)
+        return len(signups)
+
+
+# EVENTS HANDLERS
+
+async def event_detail(id: int) -> Page:
+    async with Session() as db_session:
+        db_result = await models.Event.get(db_session, id=id, raise_404=False)
+    return db_result
 
 
 async def events_page(page_current: int = 1, limit: int = 10) -> Page:
@@ -125,6 +179,29 @@ async def events_page(page_current: int = 1, limit: int = 10) -> Page:
                 elements_ids=event_ids)
 
 
+# SIGNUPS HANDLERS
+
+async def user_signup_page(call: types.CallbackQuery) -> str:
+    """Generate paginated signup list by user id
+    """
+
+    user = await user_profile(call)
+    async with Session() as db_session:
+        db_signups = await models.Signup.by_user(db_session, user.id)
+        elements_total = len(db_signups)
+
+    text = texts.my_signups.format(
+        signup_count=elements_total)
+
+    for index, signup in enumerate(db_signups):
+        text += texts.signups_page_detail.format(
+            index=emoji_num[index+1],
+            name=signup.event.name,
+            start=time_text(signup.event.start),
+            end=time_text(signup.event.end, True))
+    return text
+
+
 async def _get_or_create_signup(call: types.CallbackQuery, event_id: int) -> Union[bool, models.Signup]:
     """Get or create new signup
 
@@ -135,10 +212,11 @@ async def _get_or_create_signup(call: types.CallbackQuery, event_id: int) -> Uni
     Returns:
         Union[bool, models.Signup]: False or model
     """
+
     async with Session() as db_session:
         try:
             user = await models.User.get(
-                db_session, tg_id=call.from_user.id)
+                db_session, tg_id=call.from_user.id, raise_404=False)
         except Exception:
             await call.message.edit_text(
                 texts.register_not,
@@ -152,47 +230,26 @@ async def _get_or_create_signup(call: types.CallbackQuery, event_id: int) -> Uni
                 reply_markup=None)
             return False
 
-        # get_signup = models.Signup.get_list(
-        #     db_session=db_session, user_id=user.id, event_id=event.id)
+        get_signup = await models.Signup.get_list(
+            db_session=db_session,
+            one=True,
+            user_id=user.id,
+            event_id=event.id)
+
+        if get_signup:
+            return get_signup
+
         new_signup = models.Signup(user_id=user.id, event_id=event.id)
         await new_signup.save(db_session)
         return new_signup
 
 
-async def signup_create(call: types.CallbackQuery, event_id: int) -> bool:
+async def signup_create(call: types.CallbackQuery, event_id: int) -> models.Signup:
     return await _get_or_create_signup(call, event_id)
 
 
-async def event_detail(id: int) -> Page:
+async def signup_cancel(call: types.CallbackQuery, event_id: int) -> None:
+    # TODO Add time check or add cancel attribute to model
+    get_signup = await _get_or_create_signup(call, event_id)
     async with Session() as db_session:
-        db_result = await models.Event.get(db_session, id=id, raise_404=False)
-    return db_result
-
-
-async def get_valid_state(call: types.CallbackQuery, state: FSMContext) -> FSMContext:
-    """Check for expiration validity of a callback
-
-    If not valid, create a countdown destruction of the the message.
-
-    TODO: Investigate whether the asyncio.sleep function causes a delay for the
-    the whole loop and not just the user. Ideally, it should not cause a delay
-    for either.
-
-    Args:
-        call (types.CallbackQuery): Inline call of the current context
-        state (FSMContext): Finite state machine context
-
-    Returns:
-        FSMContext: Return the context
-    """
-    passed_state = await state.get_data()
-    if not passed_state:
-        seconds = 5
-        while seconds > 0:
-            await call.message.edit_text(
-                texts.inline_expired_destroy.format(seconds=seconds),
-                reply_markup=None)
-            await asyncio.sleep(1)
-            seconds -= 1
-        await call.message.delete()
-    return passed_state
+        await get_signup.delete(db_session)

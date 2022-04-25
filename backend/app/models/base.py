@@ -188,9 +188,26 @@ class BaseModel(Base):
                 detail=repr(ex))
 
     @classmethod
-    async def get_list(self, db_session: AsyncSession, **kwargs) -> List:
-        """Get list of objects"""
+    async def get_list(
+        self,
+        db_session: AsyncSession,
+        one: bool = False,
+        **kwargs
+    ) -> List:
+        """Get list of objects
+
+        Args:
+            db_session (AsyncSession): Current db session
+            one (bool, optional): Return as scalar with one object.
+                Essentially checks if object exists or is None.
+                Defaults to False.
+
+        Returns:
+            List: As objects list or object (None or object)
+        """
         result = await self._get_objects(db_session, paginated=False, **kwargs)
+        if one:
+            return result.scalar()
         return result.scalars().all()
 
     @classmethod

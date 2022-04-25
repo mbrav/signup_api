@@ -15,8 +15,10 @@ logger = logging.getLogger()
 
 async def feed_update(update: Dict[str, Any]) -> None:
     telegram_update = types.Update(**update)
-    # await dp.feed_update(bot, telegram_update)
-    await dp.feed_webhook_update(bot, telegram_update)
+    if settings.WEBHOOK_USE:
+        await dp.feed_webhook_update(bot, telegram_update)
+    else:
+        await dp.feed_update(bot, telegram_update)
 
 
 @router.post(path='')
@@ -30,15 +32,19 @@ async def on_startup() -> None:
     logging.info('Telegram bot startup')
     Bot.set_current(bot)
     await set_bot_commands(bot)
-    current_webhook = await bot.get_webhook_info()
-    if current_webhook.url != settings.WEBHOOK_PATH:
-        await bot.set_webhook(
-            url=settings.WEBHOOK_URL,
-            certificate=settings.SSL_PUBLIC)
-    await bot.send_message(settings.TELEGRAM_ADMIN, 'Signup Bot')
+    if settings.WEBHOOK_USE:
+        current_webhook = await bot.get_webhook_info()
+        if current_webhook.url != settings.WEBHOOK_PATH:
+            await bot.set_webhook(
+                url=settings.WEBHOOK_URL,
+                certificate=settings.SSL_PUBLIC)
+    else:
+        bot.get_updates()
+    await bot.send_message(settings.TELEGRAM_ADMIN, '🤖🟢Signup Bot Startup')
 
 
 @router.on_event('shutdown')
 async def on_shutdown() -> None:
     logging.info('Telegram bot shutdown')
+    await bot.send_message(settings.TELEGRAM_ADMIN, '🤖🔴Signup Bot Shutdown')
     await bot.delete_webhook()

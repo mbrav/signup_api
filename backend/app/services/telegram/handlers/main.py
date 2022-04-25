@@ -6,7 +6,8 @@ from app.config import settings
 from .. import texts
 from ..keyboards import me_keyboard, pagination_keyboard
 from ..loader import bot, dp
-from .handlers import events_page, user_profile, user_registration
+from .handlers import (events_page, user_profile, user_registration,
+                       user_signup_count, user_signup_page)
 from .states import BotState
 
 
@@ -61,12 +62,12 @@ async def events(message: types.Message, state: FSMContext):
 @dp.message(F.text.in_({'me', 'my'}))
 async def me(message: types.Message, state: FSMContext):
 
-    page = await events_page()
-    await state.set_state(BotState.account_view)
-    await state.update_data(page.dict())
+    await state.set_state(BotState.me_view)
 
     user = await user_profile(message)
+    signup_count = await user_signup_count(user.id)
+
     await bot.send_message(
         message.chat.id,
-        texts.my_account.format(signup_count=user.id),
-        reply_markup=me_keyboard)
+        texts.my_account.format(signup_count=signup_count),
+        reply_markup=me_keyboard(action=None))

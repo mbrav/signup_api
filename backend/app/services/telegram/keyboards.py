@@ -20,26 +20,6 @@ emoji_num = [
     '🔟',
 ]
 
-me_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text=texts.inline_me_button_1,
-                callback_data=MeCallback(
-                    action=Action.signups).pack()),
-            InlineKeyboardButton(
-                text=texts.inline_me_button_2,
-                callback_data=MeCallback(
-                    action=Action.account).pack()),
-            InlineKeyboardButton(
-                text=texts.inline_me_button_3,
-                callback_data=MeCallback(
-                    action=Action.settings).pack()),
-            # KeyboardButton(text=texts.inline_me_button_3,
-            #                request_contact=True)
-        ]
-    ])
-
 pagination_nav = [
     InlineKeyboardButton(
         text=texts.inline_signup_button_1,
@@ -53,6 +33,33 @@ pagination_nav = [
 ]
 
 
+def me_keyboard(action: Action):
+    keys = []
+
+    if action and action != Action.back:
+        keys.append(InlineKeyboardButton(
+            text=texts.inline_signup_action_1,
+            callback_data=MeCallback(
+                    action=Action.back).pack()))
+    if action != Action.signups:
+        keys.append(InlineKeyboardButton(
+            text=texts.inline_me_button_1,
+            callback_data=MeCallback(
+                    action=Action.signups).pack()))
+    if action != Action.account:
+        keys.append(InlineKeyboardButton(
+            text=texts.inline_me_button_2,
+            callback_data=MeCallback(
+                    action=Action.account).pack()))
+    if action != Action.settings:
+        keys.append(InlineKeyboardButton(
+            text=texts.inline_me_button_3,
+            callback_data=MeCallback(
+                    action=Action.settings).pack()))
+
+    return InlineKeyboardMarkup(inline_keyboard=[keys])
+
+
 def signup_detail_nav(
     id: int,
     selected: bool = False,
@@ -62,7 +69,7 @@ def signup_detail_nav(
 
     Args:
         id (int): id of the object to dispaly in inline context
-        selected (bool, optional): Selected of not selected state. Defaults to False.
+        selected (bool, optional): Signup selected. Defaults to False.
         notification (bool, optional): Pass state option notification state.
             Generates if either True or False. Defaults to None.
 
@@ -81,7 +88,7 @@ def signup_detail_nav(
             InlineKeyboardButton(
                 text=texts.inline_signup_action_3,
                 callback_data=EventCallback(
-                    action=Action.signup,
+                    action=Action.signup_cancel,
                     option_id=id).pack()))
     else:
         keys.append(

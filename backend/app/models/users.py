@@ -17,6 +17,10 @@ class User(BaseModel):
     is_active = Column(Boolean(), default=True)
     is_admin = Column(Boolean(), default=False)
 
+    # IETF language tag
+    # https://en.wikipedia.org/wiki/IETF_language_tag
+    language_code = Column(String(8), default='en')
+
     signups = relationship('Signup', back_populates='user')
     tasks = relationship('Task', back_populates='user')
 
@@ -27,6 +31,7 @@ class User(BaseModel):
                  email: str = None,
                  first_name: str = None,
                  last_name: str = None,
+                 language_code: str = None,
                  is_active: bool = True,
                  is_admin: bool = False):
 
@@ -36,5 +41,6 @@ class User(BaseModel):
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
+        self.language_code = language_code
         self.is_active = is_active
         self.is_admin = is_admin

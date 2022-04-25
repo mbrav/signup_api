@@ -1,8 +1,8 @@
 command1_detail = 'Begin bot'
-command2_detail = 'Register new account'
-command3_detail = 'Get current list of events'
-command4_detail = 'My account'
-command5_detail = 'Get help info'
+command2_detail = 'Get help info'
+command3_detail = 'Register new account'
+command4_detail = 'Get current list of events'
+command5_detail = 'My account'
 
 help_text = f"""
 <b>Available Commands:</b>
@@ -30,6 +30,11 @@ Powered by aiogram
 
 my_account = """
 👤<b>My account</b>
+📝<b>Signups:</b> {signup_count}
+"""
+
+my_signups = """
+👤<b>My signups</b>
 📝<b>Signups:</b> {signup_count}
 """
 
@@ -73,7 +78,17 @@ events_page_detail = """
 {start} - {end}
 """
 
+signups_page_detail = """
+<b>{index}</b> - <i>{name}</i>
+{start} - {end}
+"""
+
 events_detail = """
+<i>{name}</i>
+{start} - {end}
+"""
+
+signups_detail = """
 <i>{name}</i>
 {start} - {end}
 """

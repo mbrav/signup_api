@@ -16,4 +16,5 @@ class Page(BaseModel):
 
 class BotState(StatesGroup):
     page_view = State()
-    account_view = State()
+    me_view = State()
+    me_signups_view = State()

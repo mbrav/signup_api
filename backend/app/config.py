@@ -15,7 +15,7 @@ class SettingsBase(BaseSettings):
 
     """
 
-    VERSION: str = Field('0.1.7')
+    VERSION: str = Field('0.1.8')
 
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)
@@ -92,6 +92,7 @@ class ExternalServiceMixin(SettingsBase):
     TELEGRAM_ADMIN: Optional[int] = Field(
         env='TELEGRAM_ADMIN', default=12345678)
 
+    WEBHOOK_USE: Optional[bool] = Field(env='WEBHOOK_USE', default=False)
     WEBHOOK_HOST: Optional[str] = Field(env='WEBHOOK_HOST')
     WEBHOOK_PORT: Optional[int] = Field(env='WEBHOOK_PORT', default=80)
     WEBHOOK_PATH: Optional[str] = Field(env='WEBHOOK_PATH', default='/bot')
