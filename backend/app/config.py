@@ -15,7 +15,7 @@ class SettingsBase(BaseSettings):
 
     """
 
-    VERSION: str = Field('0.1.8')
+    VERSION: str = Field('0.1.9')
 
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)

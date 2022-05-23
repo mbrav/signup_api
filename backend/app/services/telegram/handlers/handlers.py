@@ -248,8 +248,9 @@ async def signup_create(call: types.CallbackQuery, event_id: int) -> models.Sign
     return await _get_or_create_signup(call, event_id)
 
 
-async def signup_cancel(call: types.CallbackQuery, event_id: int) -> None:
+async def signup_cancel(call: types.CallbackQuery, event_id: int) -> models.Signup:
     # TODO Add time check or add cancel attribute to model
     get_signup = await _get_or_create_signup(call, event_id)
     async with Session() as db_session:
         await get_signup.delete(db_session)
+    return get_signup

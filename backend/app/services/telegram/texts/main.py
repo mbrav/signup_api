@@ -83,12 +83,29 @@ signups_page_detail = """
 {start} - {end}
 """
 
-events_detail = """
+signup_success = """
+Signup success for:
+
+📝<b>{name}</b>
+{start} - {end}
+
+You will be notified prior to class.
+Go to /me to view all your current signups
+"""
+
+signup_cancel = """
+Signup Cancelled:
+
+❌<b>{name}</b>
+{start} - {end}
+"""
+
+event_detail = """
 <i>{name}</i>
 {start} - {end}
 """
 
-signups_detail = """
+signup_detail = """
 <i>{name}</i>
 {start} - {end}
 """

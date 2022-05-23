@@ -45,7 +45,7 @@ async def inline_events_list(call: types.CallbackQuery, state: FSMContext):
 
 
 @dp.callback_query(EventCallback.filter(F.option_id))
-async def inline_events_detail(
+async def inline_event_detail(
     call: types.CallbackQuery,
     state: FSMContext
 ):
@@ -56,26 +56,40 @@ async def inline_events_detail(
     event_id = EventCallback.unpack(call.data).option_id
     action = EventCallback.unpack(call.data).action
 
-    signup = None
-    if action is Action.signup:
-        signup = await signup_create(call, event_id)
-    if action is Action.signup_cancel:
-        await signup_cancel(call, event_id)
-
-    reply_markup = signup_detail_nav(
-        id=event_id, selected=True if signup else False)
-
-    detail = await event_detail(id=event_id)
-    if not detail:
+    event = await event_detail(id=event_id)
+    if not event:
         return await bot.send_message(
             call.from_user.id,
             texts.inline_fail)
 
+    signup = None
+    if action is Action.signup:
+        signup = await signup_create(call, event_id)
+        await bot.send_message(
+            call.from_user.id,
+            texts.signup_success.format(
+                name=event.name,
+                start=time_text(event.end),
+                end=time_text(event.start, time_only=True)))
+
+    if action is Action.signup_cancel:
+        signup = await signup_cancel(call, event_id)
+        await bot.send_message(
+            call.from_user.id,
+            texts.signup_cancel.format(
+                name=event.name,
+                start=time_text(event.end),
+                end=time_text(event.start, time_only=True)))
+
+    selected = True if signup and action is not Action.signup_cancel else False
+    reply_markup = signup_detail_nav(
+        id=event_id, selected=selected)
+
     await call.message.edit_text(
-        texts.events_detail.format(
-            name=detail.name,
-            start=time_text(detail.end),
-            end=time_text(detail.start, time_only=True)),
+        texts.event_detail.format(
+            name=event.name,
+            start=time_text(event.end),
+            end=time_text(event.start, time_only=True)),
         reply_markup=reply_markup)
 
 

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup)
@@ -63,7 +63,7 @@ def me_keyboard(action: Action):
 def signup_detail_nav(
     id: int,
     selected: bool = False,
-    notification: Optional[bool] = None,
+    notification: Optional[Union[bool, None]] = None,
 ) -> InlineKeyboardMarkup:
     """Generate signup detail based on states
 
@@ -83,7 +83,7 @@ def signup_detail_nav(
             callback_data=EventCallback(page_nav=PageNav.center).pack())
     ]
 
-    if selected:
+    if selected is True:
         keys.append(
             InlineKeyboardButton(
                 text=texts.inline_signup_action_3,
@@ -112,6 +112,7 @@ def signup_detail_nav(
                 callback_data=EventCallback(
                     action=Action.notify_toggle,
                     option_id=id).pack()))
+
     keyboard = [keys]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
