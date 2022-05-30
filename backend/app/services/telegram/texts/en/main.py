@@ -25,7 +25,6 @@ help_text_extra = help_text + """
 start_text = """
 🤖Hi!
 This is signup_api v{version}!
-Powered by aiogram
 """ + help_text
 
 my_account = """
@@ -66,6 +65,7 @@ inline_expired = """
 
 inline_expired_destroy = inline_expired + """
 🗑️<i>The following message will self-destruct in {seconds} seconds.</i>
+<i>Please wait</i>
 """
 
 events_page_body = """

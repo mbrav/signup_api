@@ -21,13 +21,13 @@ emoji_num = [
 
 pagination_nav = [
     InlineKeyboardButton(
-        text=texts.inline_signup_button_1,
+        text=texts.ru.inline_signup_button_1,
         callback_data=EventCallback(page_nav=PageNav.left).pack()),
     InlineKeyboardButton(
-        text=texts.inline_signup_button_2,
+        text=texts.ru.inline_signup_button_2,
         callback_data=EventCallback(page_nav=PageNav.center).pack()),
     InlineKeyboardButton(
-        text=texts.inline_signup_button_3,
+        text=texts.ru.inline_signup_button_3,
         callback_data=EventCallback(page_nav=PageNav.right).pack())
 ]
 
@@ -37,22 +37,22 @@ def me_keyboard(action: Action):
 
     if action and action != Action.back:
         keys.append(InlineKeyboardButton(
-            text=texts.inline_signup_action_1,
+            text=texts.ru.inline_signup_action_1,
             callback_data=MeCallback(
                     action=Action.back).pack()))
     if action != Action.signups:
         keys.append(InlineKeyboardButton(
-            text=texts.inline_me_button_1,
+            text=texts.ru.inline_me_button_1,
             callback_data=MeCallback(
                     action=Action.signups).pack()))
     if action != Action.account:
         keys.append(InlineKeyboardButton(
-            text=texts.inline_me_button_2,
+            text=texts.ru.inline_me_button_2,
             callback_data=MeCallback(
                     action=Action.account).pack()))
     if action != Action.settings:
         keys.append(InlineKeyboardButton(
-            text=texts.inline_me_button_3,
+            text=texts.ru.inline_me_button_3,
             callback_data=MeCallback(
                     action=Action.settings).pack()))
 
@@ -78,21 +78,21 @@ def signup_detail_nav(
 
     keys = [
         InlineKeyboardButton(
-            text=texts.inline_signup_action_1,
+            text=texts.ru.inline_signup_action_1,
             callback_data=EventCallback(page_nav=PageNav.center).pack())
     ]
 
     if selected is True:
         keys.append(
             InlineKeyboardButton(
-                text=texts.inline_signup_action_3,
+                text=texts.ru.inline_signup_action_3,
                 callback_data=EventCallback(
                     action=Action.signup_cancel,
                     option_id=id).pack()))
     else:
         keys.append(
             InlineKeyboardButton(
-                text=texts.inline_signup_action_2,
+                text=texts.ru.inline_signup_action_2,
                 callback_data=EventCallback(
                     action=Action.signup,
                     option_id=id).pack()))
@@ -100,14 +100,14 @@ def signup_detail_nav(
     if notification is True:
         keys.append(
             InlineKeyboardButton(
-                text=texts.inline_notify_on,
+                text=texts.ru.inline_notify_on,
                 callback_data=EventCallback(
                     action=Action.notify_toggle,
                     option_id=id).pack()))
     elif notification is False:
         keys.append(
             InlineKeyboardButton(
-                text=texts.inline_notify_off,
+                text=texts.ru.inline_notify_off,
                 callback_data=EventCallback(
                     action=Action.notify_toggle,
                     option_id=id).pack()))

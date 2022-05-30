@@ -1,4 +1,3 @@
 
-from .keyboards import *
-from .main import *
+from . import en, ru
 from .stickers import *

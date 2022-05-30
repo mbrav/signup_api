@@ -34,7 +34,7 @@ async def inline_events_list(call: types.CallbackQuery, state: FSMContext):
     if not page:
         return await bot.send_message(
             call.from_user.id,
-            texts.inline_fail)
+            texts.ru.inline_fail)
 
     await state.update_data(page_current=page_current)
     await state.update_data(elements_ids=page.elements_ids)
@@ -60,14 +60,14 @@ async def inline_event_detail(
     if not event:
         return await bot.send_message(
             call.from_user.id,
-            texts.inline_fail)
+            texts.ru.inline_fail)
 
     signup = None
     if action is Action.signup:
         signup = await signup_create(call, event_id)
         await bot.send_message(
             call.from_user.id,
-            texts.signup_success.format(
+            texts.ru.signup_success.format(
                 name=event.name,
                 start=time_text(event.end),
                 end=time_text(event.start, time_only=True)))
@@ -76,7 +76,7 @@ async def inline_event_detail(
         signup = await signup_cancel(call, event_id)
         await bot.send_message(
             call.from_user.id,
-            texts.signup_cancel.format(
+            texts.ru.signup_cancel.format(
                 name=event.name,
                 start=time_text(event.end),
                 end=time_text(event.start, time_only=True)))
@@ -86,7 +86,7 @@ async def inline_event_detail(
         id=event_id, selected=selected)
 
     await call.message.edit_text(
-        texts.event_detail.format(
+        texts.ru.event_detail.format(
             name=event.name,
             start=time_text(event.end),
             end=time_text(event.start, time_only=True)),
@@ -108,7 +108,7 @@ async def inline_me(
     # Temp place holder
     if action in (Action.account, Action.settings):
         user_info = call.from_user
-        text = texts.help_text_extra.format(
+        text = texts.ru.help_text_extra.format(
             first_name=user_info.first_name,
             last_name=user_info.first_name,
             username=user_info.username,
@@ -118,7 +118,7 @@ async def inline_me(
     if action is Action.back:
         user = await user_profile(call)
         signup_count = await user_signup_count(user.id)
-        text = texts.my_account.format(signup_count=signup_count)
+        text = texts.ru.my_account.format(signup_count=signup_count)
 
     await call.message.edit_text(
         text,

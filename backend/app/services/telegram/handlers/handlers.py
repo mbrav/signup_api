@@ -44,7 +44,7 @@ async def get_valid_state(call: types.CallbackQuery, state: FSMContext) -> FSMCo
         seconds = 5
         while seconds > 0:
             await call.message.edit_text(
-                texts.inline_expired_destroy.format(seconds=seconds),
+                texts.ru.inline_expired_destroy.format(seconds=seconds),
                 reply_markup=None)
             await asyncio.sleep(1)
             seconds -= 1
@@ -76,10 +76,10 @@ async def _user_get_or_create(
         if registration:
             if user:
                 return await message.reply(
-                    texts.register_already.format(
+                    texts.ru.register_already.format(
                         username=message.from_user.username))
             await bot.send_message(
-                message.from_user.id, texts.register_create)
+                message.from_user.id, texts.ru.register_create)
 
             username = str(message.from_user.id) if not (
                 message.from_user.username) else message.from_user.username
@@ -94,7 +94,7 @@ async def _user_get_or_create(
                 created_user = await new_user.save(db_session)
                 await bot.send_message(
                     message.from_user.id,
-                    texts.register_success.format(
+                    texts.ru.register_success.format(
                         username=created_user.username))
                 await bot.send_message(
                     settings.TELEGRAM_ADMIN,
@@ -102,7 +102,7 @@ async def _user_get_or_create(
             except Exception as ex:
                 await bot.send_message(
                     message.from_user.id,
-                    texts.register_fail)
+                    texts.ru.register_fail)
                 await bot.send_message(
                     settings.TELEGRAM_ADMIN,
                     f'Error creating account\n {repr(ex)}')
@@ -111,7 +111,7 @@ async def _user_get_or_create(
     if not user:
         return await bot.send_message(
             message.from_user.id,
-            texts.register_not)
+            texts.ru.register_not)
     return user
 
 
@@ -157,7 +157,7 @@ async def events_page(page_current: int = 1, limit: int = 10) -> Page:
         elements_total = await models.Event.get_current_count(db_session)
         pages_total = (elements_total // limit) + 1
 
-    text = texts.events_page_body.format(
+    text = texts.ru.events_page_body.format(
         page_current=page_current,
         pages_total=pages_total,
         elements_total=elements_total)
@@ -165,7 +165,7 @@ async def events_page(page_current: int = 1, limit: int = 10) -> Page:
     event_ids = []
     for index, event in enumerate(db_events):
         event_ids.append(event.id)
-        text += texts.events_page_detail.format(
+        text += texts.ru.events_page_detail.format(
             index=emoji_num[index+1],
             name=event.name,
             start=time_text(event.start),
@@ -190,11 +190,11 @@ async def user_signup_page(call: types.CallbackQuery) -> str:
         db_signups = await models.Signup.by_user(db_session, user.id)
         elements_total = len(db_signups)
 
-    text = texts.my_signups.format(
+    text = texts.ru.my_signups.format(
         signup_count=elements_total)
 
     for index, signup in enumerate(db_signups):
-        text += texts.signups_page_detail.format(
+        text += texts.ru.signups_page_detail.format(
             index=emoji_num[index+1],
             name=signup.event.name,
             start=time_text(signup.event.start),
@@ -219,14 +219,14 @@ async def _get_or_create_signup(call: types.CallbackQuery, event_id: int) -> Uni
                 db_session, tg_id=call.from_user.id, raise_404=False)
         except Exception:
             await call.message.edit_text(
-                texts.register_not,
+                texts.ru.register_not,
                 reply_markup=None)
             return False
         try:
             event = await models.Event.get(db_session, id=event_id)
         except Exception:
             await call.message.edit_text(
-                texts.inline_fail,
+                texts.ru.inline_fail,
                 reply_markup=None)
             return False
 

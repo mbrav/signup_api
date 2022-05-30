@@ -19,7 +19,7 @@ async def start(message: types.Message, state: FSMContext):
         message.from_user.id,
         sticker=(texts.lotus_sheep))
     await message.reply(
-        texts.start_text.format(version=settings.VERSION))
+        texts.ru.start_text.format(version=settings.VERSION))
 
 
 @dp.message(Command(commands=['register']), state='*')
@@ -35,7 +35,7 @@ async def help(message: types.Message, state: FSMContext):
     user_info = message.from_user
     await state.set_state(None)
     await message.reply(
-        texts.help_text_extra.format(
+        texts.ru.help_text_extra.format(
             first_name=user_info.first_name,
             last_name=user_info.first_name,
             username=user_info.username,
@@ -69,5 +69,5 @@ async def me(message: types.Message, state: FSMContext):
 
     await bot.send_message(
         message.chat.id,
-        texts.my_account.format(signup_count=signup_count),
+        texts.ru.my_account.format(signup_count=signup_count),
         reply_markup=me_keyboard(action=None))
