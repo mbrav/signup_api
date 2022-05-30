@@ -41,7 +41,12 @@ addopts = "-vv -p no:cacheprovider"
 asyncio_mode = "auto"
 env = [
     "TESTING=True",
-    "LOGGING=False"
+    "LOGGING=False",
+    "POSTGRES_USER=postgres",
+    "POSTGRES_PASSWORD=postgres",
+    "POSTGRES_SERVER=db",
+    "POSTGRES_PORT=5432",
+    "POSTGRES_DB=postgres",
 ]
 
 [build-system]

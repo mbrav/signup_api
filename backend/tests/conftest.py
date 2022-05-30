@@ -7,8 +7,7 @@ Pytest fixtures have five different scopes: function, class, module, package, an
 from typing import AsyncGenerator
 
 import pytest
-from app import api, db, utils
-from app.services import AuthService
+from app import db, utils
 from fastapi import FastAPI
 from httpx import AsyncClient
 from main import app
@@ -37,11 +36,6 @@ async def async_client(get_app, scope='session') -> AsyncGenerator:
 
     async with AsyncClient(app=get_app, base_url='http://test') as client:
         yield client
-
-
-@pytest.fixture
-async def authservice(scope='session') -> AuthService:
-    return api.deps.auth_service
 
 
 @pytest.fixture

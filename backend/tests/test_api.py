@@ -24,11 +24,4 @@ class TestApi:
 
         response = await async_client.post(
             f'{settings.API_V1_STR}/signups', json=new_signup)
-
-        # created_signup = await models.Signup.get(
-        #     db_session, last_name=new_signup['last_name'], raise_404=False)
-
-        assert response.status_code == 201
-        # assert response.status_code == response
-        # assert created_signup
-        # assert new_signup.items() <= created_signup.items()
+        assert response.status_code == 401
