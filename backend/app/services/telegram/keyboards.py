@@ -1,7 +1,6 @@
 from typing import Optional, Union
 
-from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
-                           KeyboardButton, ReplyKeyboardMarkup)
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from . import texts
 from .callbacks import Action, EventCallback, MeCallback, PageNav

@@ -15,7 +15,7 @@ class SettingsBase(BaseSettings):
 
     """
 
-    VERSION: str = Field('0.1.9')
+    VERSION: str = Field(env='VERSION', default='0.0.1')
 
     TESTING: bool = Field(env='TESTING', default=True)
     DEBUG: bool = Field(env='DEBUG', default=False)
@@ -69,7 +69,8 @@ class PostgresMixin(DBSettings):
     def DATABASE_URL(self) -> PostgresDsn:
         url = f'postgresql+asyncpg://' \
             f'{self.POSTGRES_USER}:' \
-            f'{self.POSTGRES_PASSWORD.get_secret_value()}@{self.POSTGRES_SERVER}:' \
+            f'{self.POSTGRES_PASSWORD.get_secret_value()}' \
+            f'@{self.POSTGRES_SERVER}:' \
             f'{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
         return url
 
