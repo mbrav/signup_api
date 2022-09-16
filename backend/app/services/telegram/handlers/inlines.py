@@ -1,5 +1,5 @@
 from aiogram import F, types
-from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.fsm.context import FSMContext
 
 from .. import texts
 from ..callbacks import Action, EventCallback, MeCallback, PageNav

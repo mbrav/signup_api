@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Union
 
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.fsm.context import FSMContext
 from app import models, schemas
 from app.config import settings
 from app.db import Session

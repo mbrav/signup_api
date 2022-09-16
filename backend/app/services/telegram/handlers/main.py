@@ -1,6 +1,6 @@
 from aiogram import F, types
-from aiogram.dispatcher.filters import Command
-from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from app.config import settings
 
 from .. import texts

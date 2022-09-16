@@ -29,6 +29,7 @@ class Signup(BaseModel):
                  notification: bool = True):
         self.user_id = user_id
         self.event_id = event_id
+        self.cancelled = cancelled
         self.notification = notification
 
     @classmethod
@@ -45,7 +46,7 @@ class Signup(BaseModel):
         Args:
             db_session (AsyncSession): Current db session
             user_id (int): User id
-            days_ago (Union[int, None], optional): Ignore events before n days ago.
+            days_ago (Union[int, None], optuser_idional): Ignore events before n days ago.
             Show all events if None. Defaults to 0.
             limit (int, optional): limit result. Defaults to None.
             offset (int, optional): offset result. Defaults to 0.

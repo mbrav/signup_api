@@ -1,6 +1,6 @@
 from enum import Enum
 
-from aiogram.dispatcher.filters.callback_data import CallbackData
+from aiogram.filters.callback_data import CallbackData
 
 
 class PageNav(str, Enum):
