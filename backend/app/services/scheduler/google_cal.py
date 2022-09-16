@@ -1,12 +1,12 @@
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional
+from typing import List, Optional
 
+import httpx
 from app import db
 from app.models import Event
 from app.schemas import EventCalIn
-from httpx import AsyncClient
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,18 @@ class EventListParams(BaseModel):
     sanitizeHtml: Optional[str] = 'true'
     timeMin: Optional[str]
     # timeMax: Optional[datetime]
+
+    @validator('singleEvents')
+    def singleEvents_valid(cls, val):
+        error = 'singleEvents must be "true" or false'
+        assert val in ('true', 'false'), error
+        return val
+
+    @validator('sanitizeHtml')
+    def sanitizeHtml_valid(cls, val):
+        error = 'sanitizeHtml must be "true" or false'
+        assert val in ('true', 'false'), error
+        return val
 
 
 def sanitize_keys(d: dict) -> dict:
@@ -57,7 +69,7 @@ class CalendarService:
             self,
             api_key: str,
             cal_id: str,
-            days_ago: int = 0):
+            days_ago: int = 1):
 
         self.days_ago = days_ago
         self._set_time()
@@ -75,24 +87,35 @@ class CalendarService:
     async def fetch_events(self, sanitize: bool = False) -> List:
         """Fetch events from Google Calendar API"""
 
-        async with AsyncClient() as client:
-            response = await client.get(self.cal_url, params=self.params.dict())
-        response_json = response.json()
-        self.events = response_json.get('items', [])
+        async with httpx.AsyncClient() as client:
+            response = None
+            try:
+                response = await client.get(self.cal_url, params=self.params.dict())
+            except httpx.ConnectError as errc:
+                logger.error("Error Connecting:", errc)
+            except httpx.ConnectTimeout as errt:
+                logger.error("Timeout Error:", errt)
+            except httpx.RequestError as err:
+                logger.error("OOps: Something Else", err)
+            except httpx.HTTPError as errh:
+                logger.error("Http Error:", errh)
 
-        elapsed = response.elapsed.total_seconds()
-        slow_warning = elapsed > 0.7
-        log_message = f'Response {response.status_code}, ' \
-            f'time {elapsed:.4f}s, ' \
-            f'events {len(self.events)}, ' \
-            f'yesterday {self.iso}, '
+            response_json = response.json()
+            self.events = response_json.get('items', [])
 
-        if response.status_code == 200 and not slow_warning:
-            logger.debug(log_message)
-        elif slow_warning:
-            logger.warning(log_message)
-        else:
-            logger.error(log_message)
+            elapsed = response.elapsed.total_seconds()
+            slow_warning = elapsed > 0.7
+            log_message = f'Response {response.status_code}, ' \
+                f'time {elapsed:.4f}s, ' \
+                f'events {len(self.events)}, ' \
+                f'yesterday {self.iso}, '
+
+            if response.status_code == 200 and not slow_warning:
+                logger.debug(log_message)
+            elif slow_warning:
+                logger.warning(log_message)
+            else:
+                logger.error(log_message)
 
     async def update_events(self):
         """Update events in db or create new ones"""
@@ -137,9 +160,12 @@ class CalendarService:
                     google_modified=google_modified)
 
                 new_object = Event(**new_event.dict())
-                await new_object.save(db_session)
-                logger.debug(
-                    f'Added #{google_id} - {name} to db ')
+                try:
+                    logger.debug(f'Adding #{google_id} - {name} to db ')
+                    await new_object.save(db_session)
+                except Exception as e:
+                    logger.error(
+                        f'{e}, Failed to add #{google_id} - {name} to db ')
                 continue
 
             event = event_db_dict[google_id]

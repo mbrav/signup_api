@@ -10,13 +10,13 @@ from .base import BaseModel
 class Event(BaseModel):
     """Event class"""
 
-    name = Column(String(100), nullable=False)
+    name = Column(String(128), nullable=False)
     description = Column(Text, default='')
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=True)
 
     google_modified = Column(DateTime, nullable=True)
-    google_id = Column(String(30), nullable=True)
+    google_id = Column(String(128), nullable=True)
 
     signups = relationship('Signup', back_populates='event')
 

@@ -7,13 +7,13 @@ from .base import BaseModel
 class User(BaseModel):
     """User class"""
 
-    username = Column(String(20), nullable=False)
-    hashed_password = Column(String(130), nullable=True)
+    username = Column(String(16), nullable=False)
+    hashed_password = Column(String(128), nullable=True)
 
     tg_id = Column(BigInteger, nullable=True)
-    email = Column(String(30), nullable=True)
-    first_name = Column(String(30), nullable=True)
-    last_name = Column(String(30), nullable=True)
+    email = Column(String(32), nullable=True)
+    first_name = Column(String(32), nullable=True)
+    last_name = Column(String(32), nullable=True)
     is_active = Column(Boolean(), default=True)
     is_admin = Column(Boolean(), default=False)
 

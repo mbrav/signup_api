@@ -13,10 +13,10 @@ from .users import User
 class Task(BaseModel):
     """Task class"""
 
-    name = Column(String(40), nullable=False)
+    name = Column(String(64), nullable=False)
     kwargs = Column(PickleType, nullable=False)
     result = Column(Text, nullable=True)
-    status = Column(String(20), nullable=False)
+    status = Column(String(16), nullable=False)
     delay_seconds = Column(Integer, nullable=False)
 
     planned_for = Column(DateTime, nullable=True)
