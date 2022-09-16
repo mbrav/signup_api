@@ -6,19 +6,19 @@ authors = ["mbrav <mbrav@protonmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-fastapi = "^0.78.0"
-fastapi-pagination = "^0.9"
+fastapi = "^0.85"
+fastapi-pagination = "^0.10"
 pydantic = {extras = ["email", "dotenv"], version = "^1.9"}
-uvicorn = {extras = ["standard"], version = "^0.17"}
+uvicorn = {extras = ["standard"], version = "^0.18"}
 SQLAlchemy = "^1.4"
 asyncpg = "*"
 python-jose = {extras = ["cryptography"], version = "^3.3"}
 passlib = {extras = ["argon2"], version = "^1.7"}
 python-multipart = "*"
-httpx = {extras = ["http2"], version = "^0.22"}
+httpx = {extras = ["http2"], version = "^0.23"}
 APScheduler = "^3.9"
 transliterate = "*"
-aiogram = "^3.0.0b3"
+aiogram = "^3.0.0b4"
 
 
 [tool.poetry.dev-dependencies]
