@@ -11,14 +11,14 @@ fastapi-pagination = "^0.10"
 pydantic = {extras = ["email", "dotenv"], version = "^1.9"}
 uvicorn = {extras = ["standard"], version = "^0.18"}
 SQLAlchemy = "^1.4"
-asyncpg = "*"
+asyncpg = "^0.26"
 python-jose = {extras = ["cryptography"], version = "^3.3"}
 passlib = {extras = ["argon2"], version = "^1.7"}
-python-multipart = "*"
+python-multipart = "0.0.5"
 httpx = {extras = ["http2"], version = "^0.23"}
 APScheduler = "^3.9"
-transliterate = "*"
-aiogram = "^3.0.0b4"
+transliterate = "^1.10"
+aiogram = "^3.0.0b5"
 
 
 [tool.poetry.dev-dependencies]

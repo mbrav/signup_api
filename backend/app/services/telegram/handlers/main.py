@@ -11,7 +11,7 @@ from .handlers import (events_page, user_profile, user_registration,
 from .states import BotState
 
 
-@dp.message(Command(commands=['start']), state='*')
+@dp.message(Command(commands=['start']))
 @dp.message(F.text.in_({'start', 'begin'}))
 async def start(message: types.Message, state: FSMContext):
     await state.set_state(None)
@@ -22,14 +22,14 @@ async def start(message: types.Message, state: FSMContext):
         texts.ru.start_text.format(version=settings.VERSION))
 
 
-@dp.message(Command(commands=['register']), state='*')
+@dp.message(Command(commands=['register']))
 @dp.message(F.text.in_({'register', 'login'}))
 async def register(message: types.Message, state: FSMContext):
     await state.set_state(None)
     await user_registration(message)
 
 
-@dp.message(Command(commands=['help']), state='*')
+@dp.message(Command(commands=['help']))
 @dp.message(F.text.in_({'help', 'fuck'}))
 async def help(message: types.Message, state: FSMContext):
     user_info = message.from_user
@@ -43,7 +43,7 @@ async def help(message: types.Message, state: FSMContext):
             id=user_info.id))
 
 
-@dp.message(Command(commands=['events']), state='*')
+@dp.message(Command(commands=['events']))
 @dp.message(F.text.in_({'events', 'calendar'}))
 async def events(message: types.Message, state: FSMContext):
     page = await events_page()
@@ -58,7 +58,7 @@ async def events(message: types.Message, state: FSMContext):
             ids=page.elements_ids))
 
 
-@dp.message(Command(commands=['me']), state='*')
+@dp.message(Command(commands=['me']))
 @dp.message(F.text.in_({'me', 'my'}))
 async def me(message: types.Message, state: FSMContext):
 

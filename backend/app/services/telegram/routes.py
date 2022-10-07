@@ -18,7 +18,7 @@ async def feed_update(update: Dict[str, Any]) -> None:
     if settings.WEBHOOK_USE:
         await dp.feed_webhook_update(bot, telegram_update)
     else:
-        await dp.feed_update(bot, telegram_update)
+        await dp.feed_raw_update(bot, update)
 
 
 @router.post(path='')
@@ -33,11 +33,11 @@ async def on_startup() -> None:
     Bot.set_current(bot)
     await set_bot_commands(bot)
     if settings.WEBHOOK_USE:
-        current_webhook = await bot.get_webhook_info()
-        if current_webhook.url != settings.WEBHOOK_PATH:
-            await bot.set_webhook(
-                url=settings.WEBHOOK_URL,
-                certificate=settings.SSL_PUBLIC)
+        await bot.set_webhook(url=settings.WEBHOOK_URL)
+        # current_webhook = await bot.get_webhook_info()
+        # if current_webhook.url != settings.WEBHOOK_PATH:
+        #     await bot.set_webhook(
+        #         url=settings.WEBHOOK_URL)
     else:
         bot.get_updates()
     await bot.send_message(settings.TELEGRAM_ADMIN, '🤖🟢Signup Bot Startup')
