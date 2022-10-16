@@ -37,16 +37,16 @@ class Signup(BaseModel):
         self,
         db_session: AsyncSession,
         user_id: int,
-        days_ago: Optional[Union[int, None]] = 0,
+        hours_ago: Optional[Union[int, None]] = 0,
         limit: int = None,
         offset: int = 0
     ):
-        """Get signups of a user newer than days_ago
+        """Get signups of a user newer than hours_ago
 
         Args:
             db_session (AsyncSession): Current db session
             user_id (int): User id
-            days_ago (Union[int, None], optuser_idional): Ignore events before n days ago.
+            hours_ago (Union[int, None], optuser_idional): Ignore events before n hours ago.
             Show all events if None. Defaults to 0.
             limit (int, optional): limit result. Defaults to None.
             offset (int, optional): offset result. Defaults to 0.
@@ -60,10 +60,10 @@ class Signup(BaseModel):
             joinedload(self.event)).filter(
             self.user_id == user_id)
 
-        if days_ago is not None:
+        if hours_ago is not None:
             db_query = db_query.where(
                 Event.start > datetime.utcnow() -
-                timedelta(days=days_ago))
+                timedelta(hours=hours_ago))
 
         if limit:
             db_query = db_query.limit(limit).offset(offset)

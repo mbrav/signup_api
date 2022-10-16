@@ -69,9 +69,9 @@ class CalendarService:
             self,
             api_key: str,
             cal_id: str,
-            days_ago: int = 1):
+            hours_ago: int = 6):
 
-        self.days_ago = days_ago
+        self.hours_ago = hours_ago
         self._set_time()
         self.params = EventListParams(
             key=api_key, calendarId=cal_id, timeMin=self.iso)
@@ -81,8 +81,8 @@ class CalendarService:
     def _set_time(self):
         """Setup event fetching time"""
 
-        yesterday = datetime.utcnow() - timedelta(days=self.days_ago)
-        self.iso = yesterday.astimezone().isoformat()
+        date_before = datetime.utcnow() - timedelta(hours=self.hours_ago)
+        self.iso = date_before.astimezone().isoformat()
 
     async def fetch_events(self, sanitize: bool = False) -> List:
         """Fetch events from Google Calendar API"""
@@ -108,7 +108,7 @@ class CalendarService:
             log_message = f'Response {response.status_code}, ' \
                 f'time {elapsed:.4f}s, ' \
                 f'events {len(self.events)}, ' \
-                f'yesterday {self.iso}, '
+                f'date_before {self.iso}, '
 
             if response.status_code == 200 and not slow_warning:
                 logger.debug(log_message)

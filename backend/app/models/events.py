@@ -39,15 +39,15 @@ class Event(BaseModel):
     async def get_current(
         self,
         db_session: AsyncSession,
-        days_ago: int = 0,
+        hours_ago: int = 0,
         limit: int = None,
         offset: int = 0
     ):
-        """Get events newer than days_ago
+        """Get events newer than hours_ago
 
         Args:
             db_session (AsyncSession): Current db session
-            days_ago (int, optional): Ignore events before n days ago.
+            hours_ago (int, optional): Ignore events before n hours ago.
             Defaults to 0.
             limit (int, optional): limit result. Defaults to 0.
             offset (int, optional): offset result. Defaults to 0.
@@ -57,7 +57,7 @@ class Event(BaseModel):
         """
 
         db_query = select(self).where(
-            self.start > datetime.utcnow() - timedelta(days=days_ago+1)
+            self.start > datetime.utcnow() - timedelta(hours=hours_ago)
         ).order_by(
             self.start.asc())
 
@@ -70,11 +70,11 @@ class Event(BaseModel):
     async def get_current_count(
         self,
         db_session: AsyncSession,
-        days_ago: int = 0,
+        hours_ago: int = 0,
     ) -> int:
-        """Return count only of events newer than days_ago"""
+        """Return count only of events newer than hours_ago"""
 
         db_query = select([func.count()]).select_from(self).where(
-            self.start > datetime.utcnow() - timedelta(days=days_ago))
+            self.start > datetime.utcnow() - timedelta(hours=hours_ago))
         result = await db_session.execute(db_query)
         return result.scalar()
