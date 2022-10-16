@@ -65,21 +65,27 @@ async def inline_event_detail(
     signup = None
     if action is Action.signup:
         signup = await signup_create(call, event_id)
-        await bot.send_message(
-            call.from_user.id,
-            texts.ru.signup_success.format(
-                name=event.name,
-                start=time_text(event.end),
-                end=time_text(event.start, time_only=True)))
+        if signup:
+            await bot.send_message(
+                call.from_user.id,
+                texts.ru.signup_success.format(
+                    name=event.name,
+                    start=time_text(event.end),
+                    end=time_text(event.start, time_only=True)))
+        else:
+            return
 
     if action is Action.signup_cancel:
         signup = await signup_cancel(call, event_id)
-        await bot.send_message(
-            call.from_user.id,
-            texts.ru.signup_cancel.format(
-                name=event.name,
-                start=time_text(event.end),
-                end=time_text(event.start, time_only=True)))
+        if signup:
+            await bot.send_message(
+                call.from_user.id,
+                texts.ru.signup_cancel.format(
+                    name=event.name,
+                    start=time_text(event.end),
+                    end=time_text(event.start, time_only=True)))
+        else:
+            return
 
     selected = True if signup and action is not Action.signup_cancel else False
     reply_markup = signup_detail_nav(

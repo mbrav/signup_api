@@ -75,9 +75,10 @@ async def _user_get_or_create(
 
         if registration:
             if user:
-                return await message.reply(
+                await message.reply(
                     texts.ru.register_already.format(
                         username=message.from_user.username))
+                return user
             await bot.send_message(
                 message.from_user.id, texts.ru.register_create)
 
@@ -106,12 +107,13 @@ async def _user_get_or_create(
                 await bot.send_message(
                     settings.TELEGRAM_ADMIN,
                     f'Error creating account\n {repr(ex)}')
-            return
+            return created_user
 
     if not user:
-        return await bot.send_message(
+        await bot.send_message(
             message.from_user.id,
             texts.ru.register_not)
+        return None
     return user
 
 
@@ -202,7 +204,7 @@ async def user_signup_page(call: types.CallbackQuery) -> str:
     return text
 
 
-async def _get_or_create_signup(call: types.CallbackQuery, event_id: int) -> Union[bool, models.Signup]:
+async def _get_or_create_signup(call: types.CallbackQuery, event_id: int) -> Union[None, models.Signup]:
     """Get or create new signup
 
     Args:
@@ -210,25 +212,29 @@ async def _get_or_create_signup(call: types.CallbackQuery, event_id: int) -> Uni
         event_id (int): Id of the event in the db table
 
     Returns:
-        Union[bool, models.Signup]: False or model
+        Union[None, models.Signup]: None or model
     """
 
     async with Session() as db_session:
         try:
             user = await models.User.get(
                 db_session, tg_id=call.from_user.id, raise_404=False)
-        except Exception:
-            await call.message.edit_text(
-                texts.ru.register_not,
-                reply_markup=None)
-            return False
-        try:
             event = await models.Event.get(db_session, id=event_id)
+            if not user:
+                await call.message.edit_text(
+                    texts.ru.register_not,
+                    reply_markup=None)
+                return None
+            if not event:
+                raise Exception(f'Event with id {event_id} not found')
         except Exception:
             await call.message.edit_text(
                 texts.ru.inline_fail,
                 reply_markup=None)
-            return False
+            await bot.send_message(
+                settings.TELEGRAM_ADMIN,
+                f'Event with id {event_id} not found')
+            return None
 
         get_signup = await models.Signup.get_list(
             db_session=db_session,
